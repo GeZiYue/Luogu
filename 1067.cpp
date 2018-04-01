@@ -1,0 +1,51 @@
+#include<iostream>
+#include<cstdio>
+#include<cmath>
+#include<cstring>
+#include<cstdlib>
+#include<algorithm>
+#include<fstream>
+using namespace std;
+int a[105];
+int main(){
+    int n,i;
+    cin>>n;
+    for(i=1;i<=(n+1);i++){
+        cin>>a[i];
+    }
+    if(a[1]!=1&&a[1]!=-1){
+        cout<<a[1];
+    }
+    if(a[1]==-1){
+        cout<<'-';
+    }
+    cout<<"x^"<<n;
+    for(i=2;i<=n;i++){
+        if(a[i]>0){
+            cout<<'+';
+        }
+        if(a[i]<0){
+            cout<<'-';
+        }
+        if(a[i]==0){
+            continue;
+        }
+        a[i]=abs(a[i]);
+        if(a[i]!=1){
+            cout<<a[i];
+        }
+        cout<<"x";
+        if(i!=n){
+            cout<<'^';
+            cout<<(n-i+1);
+        }
+    }
+    if(a[n+1]!=0){
+        if(a[n+1]>0){
+            cout<<'+'<<a[n+1];
+        }else{
+            cout<<a[n+1];
+        }
+    }
+    cout<<endl;
+}
