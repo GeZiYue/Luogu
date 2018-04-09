@@ -8,43 +8,30 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar(' ')
 #define EL putchar('\n')
-#define N 100005
-#define M 100005
+#define N 105
 #define File(a) freopen((string(a)+string(".in")).c_str(),"r",stdin),freopen((string(a)+string(".out")).c_str(),"w",stdout)
 template<class T1>void read(T1 &r_e_a_d);
 template<class T1>void write(T1 w_r_i_t_e);
-void add(int x,int y);
-int hed[N],nxt[M],to[M],id;
-int ans[N];
-int que[N],qh,qt;
+int DFS(int x,int y);
+int a[N][N];
+int f[N][N];
+int n,m;
+int xx[10]={0,1,-1,0,0},yy[10]={0,0,0,1,-1};
 int main(){
-    int n,m,i,j,now,x,y;
+    int i,j,ans=0;
     read(n);
     read(m);
-    for(i=1;i<=m;i++){
-        read(x);
-        read(y);
-        add(y,x);
-    }
-    for(i=n;i>=1;i--){
-        if(ans[i]){
-            continue;
-        }
-        que[qh=qt=1]=i;
-        while(qh<=qt){
-            now=que[qh++];
-            ans[now]=i;
-            for(j=hed[now];j;j=nxt[j]){
-                if(ans[to[j]]==0){
-                    que[++qt]=to[j];
-                }
-            }
+    for(i=1;i<=n;i++){
+        for(j=1;j<=m;j++){
+            read(a[i][j]);
         }
     }
     for(i=1;i<=n;i++){
-        write(ans[i]);
-        SP;
+        for(j=1;j<=m;j++){
+            ans=max(ans,DFS(i,j)+1);
+        }
     }
+    write(ans);
     EL;
     return 0;
 }
@@ -77,8 +64,18 @@ template<class T1>void write(T1 w_r_i_t_e){
         }
     }
 }
-void add(int x,int y){
-    nxt[++id]=hed[x];
-    hed[x]=id;
-    to[id]=y;
+int DFS(int x,int y){
+    if(f[x][y]){
+        return f[x][y];
+    }
+    int i,ans=0,nx,ny;
+    for(i=1;i<=4;i++){
+        nx=x+xx[i];
+        ny=y+yy[i];
+        if(nx>=1&&ny>=1&&nx<=n&&ny<=m&&a[x][y]>a[nx][ny]){
+            ans=max(ans,DFS(nx,ny)+1);
+        }
+    }
+    f[x][y]=ans;
+    return ans;
 }

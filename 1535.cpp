@@ -8,43 +8,48 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar(' ')
 #define EL putchar('\n')
-#define N 100005
-#define M 100005
-#define File(a) freopen((string(a)+string(".in")).c_str(),"r",stdin),freopen((string(a)+string(".out")).c_str(),"w",stdout)
+#define N 105
+#define File(a) freopen(a".in","r",stdin),freopen(a".out","w",stdout)
 template<class T1>void read(T1 &r_e_a_d);
 template<class T1>void write(T1 w_r_i_t_e);
-void add(int x,int y);
-int hed[N],nxt[M],to[M],id;
-int ans[N];
-int que[N],qh,qt;
+int dp[2][N][N];
+bool go[N][N];
 int main(){
-    int n,m,i,j,now,x,y;
+    int n,m,t,i,j,k;
+    int n2,m2,n3,m3;
+    int x1,x2,y1,y2;
+    char ch;
     read(n);
     read(m);
-    for(i=1;i<=m;i++){
-        read(x);
-        read(y);
-        add(y,x);
-    }
-    for(i=n;i>=1;i--){
-        if(ans[i]){
-            continue;
-        }
-        que[qh=qt=1]=i;
-        while(qh<=qt){
-            now=que[qh++];
-            ans[now]=i;
-            for(j=hed[now];j;j=nxt[j]){
-                if(ans[to[j]]==0){
-                    que[++qt]=to[j];
-                }
+    read(t);
+    for(i=1;i<=n;i++){
+        for(j=1;j<=m;j++){
+            cin>>ch;
+            if(ch=='*'){
+                go[i][j]=true;
             }
         }
     }
-    for(i=1;i<=n;i++){
-        write(ans[i]);
-        SP;
+    read(x1);
+    read(y1)
+    read(x2);
+    read(y2);
+    dp[0][x1][y1]=1;
+    n2=min(n,max(x1,x2)+t);
+    m2=min(m,max(y1,y2)+t);
+    n3=max(1,min(x1,x2)-t);
+    m3=max(1,min(y1,y2)-t);
+    for(i=1;i<=t;i++){
+        for(j=n3;j<=n2;j++){
+            for(k=m3;k<=m2;k++){
+                if(go[j][k]){
+                    continue;
+                }
+                dp[i&1][j][k]=dp[(i&1)^1][j-1][k]+dp[(i&1)^1][j+1][k]+dp[(i&1)^1][j][k-1]+dp[(i&1)^1][j][k+1];
+            }
+        }
     }
+    write(dp[t&1][x2][y2]);
     EL;
     return 0;
 }
@@ -76,9 +81,4 @@ template<class T1>void write(T1 w_r_i_t_e){
             putchar((w_r_i_t_e%10)+'0');
         }
     }
-}
-void add(int x,int y){
-    nxt[++id]=hed[x];
-    hed[x]=id;
-    to[id]=y;
 }

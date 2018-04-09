@@ -8,44 +8,30 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar(' ')
 #define EL putchar('\n')
-#define N 100005
-#define M 100005
+#define N 1000005
+#define M 1000005
 #define File(a) freopen((string(a)+string(".in")).c_str(),"r",stdin),freopen((string(a)+string(".out")).c_str(),"w",stdout)
 template<class T1>void read(T1 &r_e_a_d);
 template<class T1>void write(T1 w_r_i_t_e);
-void add(int x,int y);
-int hed[N],nxt[M],to[M],id;
-int ans[N];
-int que[N],qh,qt;
+void Get_Prime(int n);
+int prime[M],id=0;
+int sum[N];
+bool flag[N];
 int main(){
-    int n,m,i,j,now,x,y;
+    int n,m,i,x,y;
     read(n);
     read(m);
-    for(i=1;i<=m;i++){
+    Get_Prime(m);
+    for(i=1;i<=n;i++){
         read(x);
         read(y);
-        add(y,x);
-    }
-    for(i=n;i>=1;i--){
-        if(ans[i]){
+        if(y>m||x<1){
+            puts("Crossing the line");
             continue;
         }
-        que[qh=qt=1]=i;
-        while(qh<=qt){
-            now=que[qh++];
-            ans[now]=i;
-            for(j=hed[now];j;j=nxt[j]){
-                if(ans[to[j]]==0){
-                    que[++qt]=to[j];
-                }
-            }
-        }
+        write(sum[y]-sum[x-1]);
+        EL;
     }
-    for(i=1;i<=n;i++){
-        write(ans[i]);
-        SP;
-    }
-    EL;
     return 0;
 }
 template<class T1>void read(T1 &r_e_a_d){
@@ -77,8 +63,19 @@ template<class T1>void write(T1 w_r_i_t_e){
         }
     }
 }
-void add(int x,int y){
-    nxt[++id]=hed[x];
-    hed[x]=id;
-    to[id]=y;
+void Get_Prime(int n){
+    int i,j;
+    for(i=2;i<=n;i++){
+        sum[i]=sum[i-1];
+        if(flag[i]==false){
+            prime[++id]=i;
+            sum[i]++;
+        }
+        for(j=1;j<=id&&i*prime[j]<=n;j++){
+            flag[i*prime[j]]=true;
+            if(i%prime[j]==0){
+                break;
+            }
+        }
+    }
 }

@@ -8,43 +8,25 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar(' ')
 #define EL putchar('\n')
-#define N 100005
-#define M 100005
-#define File(a) freopen((string(a)+string(".in")).c_str(),"r",stdin),freopen((string(a)+string(".out")).c_str(),"w",stdout)
+#define File(a) freopen(a".in","r",stdin),freopen(a".out","w",stdout)
 template<class T1>void read(T1 &r_e_a_d);
 template<class T1>void write(T1 w_r_i_t_e);
-void add(int x,int y);
-int hed[N],nxt[M],to[M],id;
-int ans[N];
-int que[N],qh,qt;
+int a[5];
 int main(){
-    int n,m,i,j,now,x,y;
-    read(n);
-    read(m);
-    for(i=1;i<=m;i++){
-        read(x);
-        read(y);
-        add(y,x);
+    int ans=0,now;
+    read(a[1]);
+    read(a[2]);
+    read(a[3]);
+    sort(a+1,a+4,greater<int>());
+    ans+=(a[1]-a[2]);
+    a[2]=a[1];
+    a[3]+=ans;
+    now=a[1]-a[3];
+    ans+=now/2;
+    if(now&1){
+        ans+=2;
     }
-    for(i=n;i>=1;i--){
-        if(ans[i]){
-            continue;
-        }
-        que[qh=qt=1]=i;
-        while(qh<=qt){
-            now=que[qh++];
-            ans[now]=i;
-            for(j=hed[now];j;j=nxt[j]){
-                if(ans[to[j]]==0){
-                    que[++qt]=to[j];
-                }
-            }
-        }
-    }
-    for(i=1;i<=n;i++){
-        write(ans[i]);
-        SP;
-    }
+    write(ans);
     EL;
     return 0;
 }
@@ -76,9 +58,4 @@ template<class T1>void write(T1 w_r_i_t_e){
             putchar((w_r_i_t_e%10)+'0');
         }
     }
-}
-void add(int x,int y){
-    nxt[++id]=hed[x];
-    hed[x]=id;
-    to[id]=y;
 }
