@@ -8,23 +8,37 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar(' ')
 #define EL putchar('\n')
-#define File(a) freopen((string(a)+string(".in")).c_str(),"r",stdin),freopen((string(a)+string(".out")).c_str(),"w",stdout)
+#define ll long long int
+#define N 10005
+#define Mod 19260817
+#define File(a) freopen(a".in","r",stdin),freopen(a".out","w",stdout)
 template<class T1>void read(T1 &r_e_a_d);
 template<class T1>void write(T1 w_r_i_t_e);
-string str;
+ll exgcd(ll,ll,ll&,ll&);
+string a,b;
 int main(){
-    int i,n,ans=0;
-    cin>>str;
-    n=str.size();
-    for(i=0;i*2<n;i++){
-        if((str[i]=='i'||str[i]=='w')&&(str[i]!=str[n-i-1])){
-            ans++;
-        }
-        if((str[i]=='('&&str[n-i-1]!=')')||(str[i]==')'&&str[n-i-1]!='(')){
-            ans++;
-        }
+    int n,m,i;
+    ll sa=0,sb=0,x,y;
+    cin>>a>>b;
+    n=a.size();
+    m=b.size();
+    for(i=0;i<n;i++){
+        sa=(sa*10+(a[i]-'0'))%Mod;
     }
-    write(ans);
+    for(i=0;i<m;i++){
+        sb=(sb*10+(b[i]-'0'))%Mod;
+    }
+    if(sa==0){
+        puts("0");
+        return 0;
+    }
+    if(sb==0){
+        puts("Angry!");
+        return 0;
+    }
+    exgcd(sb,Mod,x,y);
+    x=(x+Mod)%Mod;
+    write(sa*x%Mod);
     EL;
     return 0;
 }
@@ -56,4 +70,14 @@ template<class T1>void write(T1 w_r_i_t_e){
             putchar((w_r_i_t_e%10)+'0');
         }
     }
+}
+ll exgcd(ll a,ll b,ll& x,ll& y){
+    if(b==0){
+        x=1;
+        y=0;
+        return a;
+    }
+    ll now=exgcd(b,a%b,y,x);
+    y=y-a/b*x;
+    return now;
 }
