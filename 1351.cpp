@@ -8,35 +8,33 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar(' ')
 #define EL putchar('\n')
-#define N 1000
-#define M 100000
+#define N 200005
+#define M 400005
+#define Mod 10007
 #define File(a) freopen(a".in","r",stdin),freopen(a".out","w",stdout)
 template<class T1>void read(T1 &r_e_a_d);
 template<class T1>void write(T1 w_r_i_t_e);
-double dp[M+5],k[N+5];
-int v[N+5];
+void add(int ,int );
+void DFS(int ,int );
+int hed[N],nxt[M],to[M],id;
+int a[N];
+int maxn,sum;
 int main(){
-    int n,i,j,l,sum=0,ans=0;
-    double m;
+    int n,i,x,y;
     read(n);
-    read(l);
-    m=(100-l)*1.0/100;
-    for(i=1;i<=n;i++){
-        read(l);
-        k[i]=(100-l)*1.0/100;
-        read(v[i]);
-        sum+=v[i];
+    for(i=1;i<n;i++){
+        read(x);
+        read(y);
+        add(x,y);
+        add(y,x);
     }
-    dp[0]=1;
     for(i=1;i<=n;i++){
-        for(j=sum-v[i];j>=0;j--){
-            dp[j+v[i]]=max(dp[j+v[i]],dp[j]*k[i]);
-            if(dp[j+v[i]]>=m){
-                ans=max(ans,j+v[i]);
-            }
-        }
+        read(a[i]);
     }
-    write(ans);
+    DFS(1,0);
+    write(maxn);
+    SP;
+    write(sum);
     EL;
     return 0;
 }
@@ -68,4 +66,34 @@ template<class T1>void write(T1 w_r_i_t_e){
             putchar((w_r_i_t_e%10)+'0');
         }
     }
+}
+void add(int x,int y){
+    nxt[++id]=hed[x];
+    hed[x]=id;
+    to[id]=y;
+}
+void DFS(int u,int fa){
+    int v,i,max1=0,max2=0,ans=0,num=0;
+    for(i=hed[u];i;i=nxt[i]){
+        v=to[i];
+        if(v==fa){
+            break;
+        }
+        if(a[v]>max1){
+            max2=max1;
+            max1=a[v];
+        }else{
+            if(a[v]>max2){
+                max2=a[v];
+            }
+        }
+        ans=(ans+a[v])%Mod;
+        num=(num+(a[v]*a[v])%Mod)%Mod;
+        maxn=max(maxn,a[v]*a[fa]);
+        sum=(sum+a[v]*a[fa])%Mod;
+        sum=(sum+a[v]*a[fa])%Mod;
+        DFS(v,u);
+    }
+    maxn=max(maxn,max1*max2);
+    sum=(sum+(ans*ans%Mod+Mod-num)%Mod)%Mod;
 }

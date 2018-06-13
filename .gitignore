@@ -1,2 +1,7 @@
-
-*.exe
+*
+!*.cpp
+!*.java
+!*.py
+!README.md
+!.gitignore
+!.gitattributes

@@ -8,22 +8,25 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar(' ')
 #define EL putchar('\n')
-#define ll long long int
+#define N 100005
 #define File(a) freopen(a".in","r",stdin),freopen(a".out","w",stdout)
 template<class T1>void read(T1 &r_e_a_d);
 template<class T1>void write(T1 w_r_i_t_e);
+int s[N],top,h[N],ans[N];
 int main(){
-    int n,i,a;
-    ll s;
+    int n,i;
     read(n);
     for(i=1;i<=n;i++){
-        read(a);
-        s+=a;
+        read(h[i]);
+        while(top&&h[i]>h[s[top]]){
+            ans[s[top]]=i;
+            top--;
+        }
+        s[++top]=i;
     }
-    if(s&1){
-        puts("Alice");
-    }else{
-        puts("Bob");
+    for(i=1;i<=n;i++){
+        write(ans[i]);
+        EL;
     }
     return 0;
 }
