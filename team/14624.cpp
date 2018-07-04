@@ -9,10 +9,10 @@
 #include<queue>
 using namespace std;
 typedef unsigned long long int ll;
-struct cmp1{  
-     bool operator()(ll x,ll y){  
+struct cmp1{
+     bool operator()(ll x,ll y){
         return x>y;
-    }  
+    }
 };
 priority_queue<ll,vector<ll>,cmp1>a;
 int main(){
@@ -33,4 +33,3 @@ int main(){
     }
     cout<<sum<<' '<<ans<<endl;
 }
-

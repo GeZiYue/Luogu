@@ -9,39 +9,43 @@ using namespace std;
 #define SP putchar(' ')
 #define EL putchar('\n')
 #define N 1005
+#define GetSum(x1,y1,x2,y2) (sum[x2][y2]-sum[x1-1][y2]-sum[x2][y1-1]+sum[x1-1][y1-1])
 #define File(a) freopen(a".in","r",stdin),freopen(a".out","w",stdout)
 template<class T1>void read(T1 &r_e_a_d);
 template<class T1>void write(T1 w_r_i_t_e);
+class Node{
+public:
+    int num,id;
+    friend bool operator<(Node ,Node );
+}xs[N],ys[N];
 int x[N],y[N];
-int xx[10]={0,1,1,-1,-1},yy[10]={0,1,-1,1,-1};
+int sum[N][N];
 int main(){
-    int n,i,j,k,a,b,c,d,nx,ny,ans;
+    int n,i,j,k,a,b,c,d,ans;
     read(n);
     for(i=1;i<=n;i++){
-        read(x[i]);
-        read(y[i]);
+        read(xs[i].num);
+        read(ys[i].num);
+        xs[i].id=ys[i].id=i;
+    }
+    sort(xs+1,xs+n+1);
+    sort(ys+1,ys+n+1);
+    for(i=1;i<=n;i++){
+        x[xs[i].id]=i;
+        y[ys[i].id]=i;
+    }
+    for(i=1;i<=n;i++){
+        sum[x[i]][y[i]]=1;
+    }
+    for(i=1;i<=n;i++){
+        for(j=1;j<=n;j++){
+            sum[i][j]+=sum[i-1][j]+sum[i][j-1]-sum[i-1][j-1];
+        }
     }
     ans=n;
     for(i=1;i<=n;i++){
-        for(j=1;j<=4;j++){
-            nx=x[i]+xx[j];
-            ny=y[i]+yy[j];
-            a=b=c=d=0;
-            for(k=1;k<=n;k++){
-                if(x[k]<nx&&y[k]<ny){
-                    a++;
-                }
-                if(x[k]<nx&&y[k]>ny){
-                    b++;
-                }
-                if(x[k]>nx&&y[k]<ny){
-                    c++;
-                }
-                if(x[k]>nx&&y[k]>ny){
-                    d++;
-                }
-            }
-            ans=min(ans,max(max(a,b),max(c,d)));
+        for(j=1;j<=n;j++){
+            ans=min(ans,max(max(GetSum(1,1,i,j),GetSum(1,j+1,i,n)),max(GetSum(i+1,1,n,j),GetSum(i+1,j+1,n,n))));
         }
     }
     write(ans);
@@ -76,4 +80,7 @@ template<class T1>void write(T1 w_r_i_t_e){
             putchar((w_r_i_t_e%10)+'0');
         }
     }
+}
+bool operator<(Node i,Node j){
+    return i.num<j.num;
 }
