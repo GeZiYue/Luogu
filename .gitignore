@@ -1,7 +1,1 @@
-*
-!*.cpp
-!*.java
-!*.py
-!README.md
-!.gitignore
-!.gitattributes
+*.exe
