@@ -14,13 +14,19 @@ using namespace std;
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
+int gcd(int, int);
 int main () {
-    int s, a, b;
-    read(s);
-    read(a);
-    read(b);
-    double t=s*1.0/(1+(b-a)*1.0/(a+b)+b*1.0/a)/a;
-    cout<<fixed<<t+(s-b*t)/a<<endl;
+    int n;
+    read(n);
+    int mini=inf;
+    for (int i=1; i<n; ++i) {
+        int now=gcd(n, i);
+        if (now!=-1) {
+            mini=min(mini, now);
+        }
+    }
+    write(mini);
+    EL;
     return 0;
 }
 template<class T1>void read(T1 &r_e_a_d) {
@@ -51,4 +57,17 @@ template<class T1>void write(T1 w_r_i_t_e) {
             putchar((w_r_i_t_e%10)+'0');
         }
     }
+}
+int gcd(int a, int b) {
+    if (b==1) {
+        return a-1;
+    }
+    if (b==0) {
+        return -1;
+    }
+    int now=gcd(b, a%b);
+    if (now==-1) {
+        return -1;
+    }
+    return a/b+now;
 }

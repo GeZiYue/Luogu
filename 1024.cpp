@@ -14,13 +14,29 @@ using namespace std;
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
+double inline f(double);
+double inline dvt_f(double);
+double inline solve(double);
+double a, b, c, d;
+double ans[5];
+int id;
 int main () {
-    int s, a, b;
-    read(s);
-    read(a);
-    read(b);
-    double t=s*1.0/(1+(b-a)*1.0/(a+b)+b*1.0/a)/a;
-    cout<<fixed<<t+(s-b*t)/a<<endl;
+    cin>>a>>b>>c>>d;
+    cout.precision(2);
+    for (double i=-100.0; i<=100.0; i+=0.5) {
+        double now=solve(i);
+        bool flag=true;
+        for (int j=1; j<=id; ++j) {
+            if (abs(ans[j]-now)<=0.5) {
+                flag=false;
+            }
+        }
+        if (flag) {
+            ans[++id]=now;
+        }
+    }
+    sort(ans+1, ans+4);
+    cout<<fixed<<ans[1]<<' '<<ans[2]<<' '<<ans[3]<<endl;
     return 0;
 }
 template<class T1>void read(T1 &r_e_a_d) {
@@ -51,4 +67,16 @@ template<class T1>void write(T1 w_r_i_t_e) {
             putchar((w_r_i_t_e%10)+'0');
         }
     }
+}
+double f(double x) {
+    return ((a*x+b)*x+c)*x+d;
+}
+double dvt_f(double x) {
+    return (a*3*x+b*2)*x+c;
+}
+double solve(double a) {
+    while (abs(f(a))>=0.00001) {
+        a=a-f(a)/dvt_f(a);
+    }
+    return a;
 }

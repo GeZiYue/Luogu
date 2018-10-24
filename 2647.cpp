@@ -11,16 +11,40 @@ using namespace std;
 #define SP putchar (' ')
 #define EL putchar ('\n')
 #define inf 2147483647
+#define N 3005
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
+class Node {
+public:
+    int w, r;
+    friend bool operator<(Node, Node);
+}a[N];
+int dp[N][N];
 int main () {
-    int s, a, b;
-    read(s);
-    read(a);
-    read(b);
-    double t=s*1.0/(1+(b-a)*1.0/(a+b)+b*1.0/a)/a;
-    cout<<fixed<<t+(s-b*t)/a<<endl;
+    int n;
+    read(n);
+    for (int i=1; i<=n; ++i) {
+        read(a[i].w);
+        read(a[i].r);
+    }
+    sort(a+1, a+n+1);
+    for (int i=1; i<=n; ++i) {
+        for (int j=1; j<=i; ++j) {
+            dp[i][j]=-inf;
+        }
+    }
+    for (int i=1; i<=n; ++i) {
+        for (int j=1; j<=i; ++j) {
+            dp[i][j]=max(dp[i-1][j], dp[i-1][j-1]+a[i].w-a[i].r*(j-1));
+        }
+    }
+    int maxi=0;
+    for (int i=1; i<=n; ++i) {
+        maxi=max(maxi, dp[n][i]);
+    }
+    write(maxi);
+    EL;
     return 0;
 }
 template<class T1>void read(T1 &r_e_a_d) {
@@ -51,4 +75,7 @@ template<class T1>void write(T1 w_r_i_t_e) {
             putchar((w_r_i_t_e%10)+'0');
         }
     }
+}
+bool operator<(Node i, Node j) {
+    return i.r>j.r;
 }

@@ -11,16 +11,25 @@ using namespace std;
 #define SP putchar (' ')
 #define EL putchar ('\n')
 #define inf 2147483647
+#define N 20
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
+void DFS(double, double);
+double ans=inf*1.0;
+double now;
+int num;
+int n;
+bool flag[N];
+double xx[N], yy[N];
 int main () {
-    int s, a, b;
-    read(s);
-    read(a);
-    read(b);
-    double t=s*1.0/(1+(b-a)*1.0/(a+b)+b*1.0/a)/a;
-    cout<<fixed<<t+(s-b*t)/a<<endl;
+    read(n);
+    for (int i=1; i<=n; ++i) {
+        cin>>xx[i]>>yy[i];
+    }
+    DFS(0, 0);
+    cout.precision(2);
+    cout<<fixed<<ans<<endl;
     return 0;
 }
 template<class T1>void read(T1 &r_e_a_d) {
@@ -49,6 +58,25 @@ template<class T1>void write(T1 w_r_i_t_e) {
         }else {
             write(w_r_i_t_e/10);
             putchar((w_r_i_t_e%10)+'0');
+        }
+    }
+}
+void DFS(double x, double y) {
+    if (num==n) {
+        ans=min(ans, now);
+        return;
+    }
+    for (int i=1; i<=n; ++i) {
+        if (flag[i]==false) {
+            now+=sqrt((xx[i]-x)*(xx[i]-x)+(yy[i]-y)*(yy[i]-y));
+            if (now<=ans) {
+                num++;
+                flag[i]=true;
+                DFS(xx[i], yy[i]);
+                flag[i]=false;
+                num--;
+            }
+            now-=sqrt((xx[i]-x)*(xx[i]-x)+(yy[i]-y)*(yy[i]-y));
         }
     }
 }

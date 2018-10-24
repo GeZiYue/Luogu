@@ -8,19 +8,44 @@
 #include<vector>
 using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
+#define isLet(a) ((a>='a'&&a<='z')||(a>='A'&&a<='Z'))
 #define SP putchar (' ')
 #define EL putchar ('\n')
 #define inf 2147483647
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
+string str;
 int main () {
-    int s, a, b;
-    read(s);
-    read(a);
-    read(b);
-    double t=s*1.0/(1+(b-a)*1.0/(a+b)+b*1.0/a)/a;
-    cout<<fixed<<t+(s-b*t)/a<<endl;
+    int n, p1, p2, p3;
+    read(p1);
+    read(p2);
+    read(p3);
+    cin>>str;
+    n=str.size();
+    putchar(str[0]);
+    for (int i=1; i<n-1; i++) {
+        if (str[i]=='-'&&str[i+1]>str[i-1]&&((isNum(str[i+1])&&isNum(str[i-1]))||
+        (isLet(str[i+1])&&isLet(str[i-1])))) {
+            for (char j=(p3==1?(str[i-1]+1):(str[i+1]-1)); (p3==1)?(j<=str[i+1]-1):(j>=str[i-1]+1); (p3==1?(++j):(--j))) {
+                char now=j;
+                if (p1==2) {
+                    now=isLet(j)?j-'a'+'A':j;
+                }else {
+                    if (p1==3) {
+                        now='*';
+                    }
+                }
+                for (int k=1; k<=p2; ++k) {
+                    putchar(now);
+                }
+            }
+        }else {
+            putchar(str[i]);
+        }
+    }
+    putchar(str[n-1]);
+    EL;
     return 0;
 }
 template<class T1>void read(T1 &r_e_a_d) {

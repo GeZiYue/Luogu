@@ -11,16 +11,31 @@ using namespace std;
 #define SP putchar (' ')
 #define EL putchar ('\n')
 #define inf 2147483647
+#define N 1005
+#define M 40005
+#define Mod 998244353
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
+int a[N];
+int f[N][M];
+int* dp[N];
 int main () {
-    int s, a, b;
-    read(s);
-    read(a);
-    read(b);
-    double t=s*1.0/(1+(b-a)*1.0/(a+b)+b*1.0/a)/a;
-    cout<<fixed<<t+(s-b*t)/a<<endl;
+    int n;
+    read(n);
+    for (int i=1; i<=n; ++i) {
+        read(a[i]);
+        dp[i]=f[i]+20001;
+    }
+    int ans=0;
+    for (int i=1; i<=n; ++i) {
+        for (int j=1; j<i; ++j) {
+            dp[i][a[i]-a[j]]=(dp[j][a[i]-a[j]]+dp[i][a[i]-a[j]]+1)%Mod;
+            ans=(ans+dp[j][a[i]-a[j]]+1)%Mod;
+        }
+    }
+    write((ans+n)%Mod);
+    EL;
     return 0;
 }
 template<class T1>void read(T1 &r_e_a_d) {

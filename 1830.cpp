@@ -11,16 +11,45 @@ using namespace std;
 #define SP putchar (' ')
 #define EL putchar ('\n')
 #define inf 2147483647
+#define N 105
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
+int x_1[N], y_1[N], x_2[N], y_2[N];
 int main () {
-    int s, a, b;
-    read(s);
-    read(a);
-    read(b);
-    double t=s*1.0/(1+(b-a)*1.0/(a+b)+b*1.0/a)/a;
-    cout<<fixed<<t+(s-b*t)/a<<endl;
+    int n, m, x, y;
+    read(n);
+    read(m);
+    read(x);
+    read(y);
+    for (int i=1; i<=x; ++i) {
+        read(x_1[i]);
+        read(y_1[i]);
+        read(x_2[i]);
+        read(y_2[i]);
+    }
+    for (int i=1; i<=y; ++i) {
+        int xx, yy;
+        read(xx);
+        read(yy);
+        int sum=0, ans=0;
+        for (int j=1; j<=x; ++j) {
+            if (x_1[j]<=xx&&x_2[j]>=xx&&y_1[j]<=yy&&y_2[j]>=yy) {
+                ++sum;
+                ans=j;
+            }
+        }
+        if (sum) {
+            putchar('Y');
+            SP;
+            write(sum);
+            SP;
+            write(ans);
+        }else {
+            putchar('N');
+        }
+        EL;
+    }
     return 0;
 }
 template<class T1>void read(T1 &r_e_a_d) {

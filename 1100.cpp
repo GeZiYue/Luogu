@@ -15,12 +15,10 @@ using namespace std;
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
 int main () {
-    int s, a, b;
-    read(s);
-    read(a);
-    read(b);
-    double t=s*1.0/(1+(b-a)*1.0/(a+b)+b*1.0/a)/a;
-    cout<<fixed<<t+(s-b*t)/a<<endl;
+    unsigned int n;
+    read(n);
+    write((n<<16)|(n>>16));
+    EL;
     return 0;
 }
 template<class T1>void read(T1 &r_e_a_d) {
