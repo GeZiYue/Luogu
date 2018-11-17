@@ -14,35 +14,39 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar (' ')
 #define EL putchar ('\n')
-#define N 200005
+#define inf 2147483647
+#define N 1000000000000
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
+typedef long long int ll;
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
-deque<int>q;
-int a[N], dp[N];
+ll f[100];
+int id;
 int main () {
-    int n, l, r;
-    read(n);
-    ++n;
-    read(l);
-    read(r);
-    for (int i=1; i<=n; ++i) {
-        read(a[i]);
-    }
-    int ans=0;
-    for (int i=l+1; i<=n; ++i) {
-        while (!q.empty()&&dp[i-l]>=dp[q.front()]) {
-            q.pop_front();
+    f[1]=1;
+    f[2]=1;
+    for (id=3; ; ++id) {
+        f[id]=f[id-1]+f[id-2];
+        if (f[id]>N) {
+            break;
         }
-        q.push_front(i-l);
-        while (i-q.back()>r) {
-            q.pop_back();
-        }
-        dp[i]=dp[q.back()]+a[i];
-        ans=max(ans, dp[i]);
     }
-    write(ans);
-    EL;
+    int t;
+    read(t);
+    while (t--) {
+        ll a, b;
+        read(a);
+        read(b);
+        while (a!=b) {
+            if (a>b) {
+                a-=f[lower_bound(f+1, f+id+1, a)-f-1];
+            }else {
+                b-=f[lower_bound(f+1, f+id+1, b)-f-1];
+            }
+        }
+        write(a);
+        EL;
+    }
     return 0;
 }
 template<class T1>void read(T1 &r_e_a_d) {
@@ -55,7 +59,7 @@ template<class T1>void read(T1 &r_e_a_d) {
         }
         ch=getchar();
     }
-    while (isNum(ch) ) {
+    while (isNum(ch)) {
         k=(k<<1)+(k<<3)+ch-'0';
         ch=getchar();
     }

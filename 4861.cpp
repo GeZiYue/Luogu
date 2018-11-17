@@ -6,43 +6,47 @@
 #include<cstdlib>
 #include<algorithm>
 #include<vector>
-#include<queue>
-#include<stack>
-#include<set>
 #include<map>
 using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar (' ')
 #define EL putchar ('\n')
-#define N 200005
+#define inf 2147483647
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
+typedef long long int ll;
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
-deque<int>q;
-int a[N], dp[N];
+int exgcd(int, int, int&, int&);
+map<int, int>p;
 int main () {
-    int n, l, r;
-    read(n);
-    ++n;
-    read(l);
-    read(r);
-    for (int i=1; i<=n; ++i) {
-        read(a[i]);
+    ll b, k;
+    read(b);
+    read(k);
+    int x, y;
+    if (exgcd(b, k, x, y)!=1) {
+        puts("Let's go Blue Jays!");
+        return 0;
     }
-    int ans=0;
-    for (int i=l+1; i<=n; ++i) {
-        while (!q.empty()&&dp[i-l]>=dp[q.front()]) {
-            q.pop_front();
+    ll m=ceil(sqrt(b*1.0))+1;
+    int t=1;
+    for (int i=0; i<m; ++i) {
+        if (!p[t]) {
+            p[t]=i;
         }
-        q.push_front(i-l);
-        while (i-q.back()>r) {
-            q.pop_back();
-        }
-        dp[i]=dp[q.back()]+a[i];
-        ans=max(ans, dp[i]);
+        t=(t*k)%b;
     }
-    write(ans);
-    EL;
+    ll D=1;
+    for (int i=0; ; ++i) {
+        exgcd(D, b, x, y);
+        x=(x*1ll+b)%b;
+        y=p[x];
+        if (y!=0) {
+            write(i*m+y);
+            EL;
+            return 0;
+        }
+        D=(D*t)%b;
+    }
     return 0;
 }
 template<class T1>void read(T1 &r_e_a_d) {
@@ -73,4 +77,14 @@ template<class T1>void write(T1 w_r_i_t_e) {
             putchar((w_r_i_t_e%10)+'0');
         }
     }
+}
+int exgcd(int a, int b, int& x, int& y) {
+    if (b==0) {
+        x=1;
+        y=0;
+        return a;
+    }
+    int now=exgcd(b, a%b, y, x);
+    y-=a/b*x;
+    return now;
 }

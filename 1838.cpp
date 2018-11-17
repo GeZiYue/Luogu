@@ -14,35 +14,45 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar (' ')
 #define EL putchar ('\n')
-#define N 200005
+#define inf 2147483647
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
-deque<int>q;
-int a[N], dp[N];
+bool check(int, int);
+char ch[15];
+short k[15];
 int main () {
-    int n, l, r;
-    read(n);
-    ++n;
-    read(l);
-    read(r);
+    cin>>(ch+1);
+    int n=strlen(ch+1);
+    memset(k, -1, sizeof(k));
     for (int i=1; i<=n; ++i) {
-        read(a[i]);
+        k[ch[i]-'0']=i&1;
     }
-    int ans=0;
-    for (int i=l+1; i<=n; ++i) {
-        while (!q.empty()&&dp[i-l]>=dp[q.front()]) {
-            q.pop_front();
-        }
-        q.push_front(i-l);
-        while (i-q.back()>r) {
-            q.pop_back();
-        }
-        dp[i]=dp[q.back()]+a[i];
-        ans=max(ans, dp[i]);
+    int ans=-1;
+    if (check(1, 1)||check(1, 3)||check(1, 4)) {
+        ans=k[1];
     }
-    write(ans);
-    EL;
+    if (check(4, 1)) {
+        ans=k[4];
+    }
+    if (check(7, 1)) {
+        ans=k[7];
+    }
+    if (check(2, 3)) {
+        ans=k[2];
+    }
+    if (check(3, 2)||check(3, 3)) {
+        ans=k[3];
+    }
+    if (ans==-1) {
+        puts("drew.");
+    }else {
+        if (ans==0) {
+            puts("uim wins.");
+        }else {
+            puts("xiaoa wins.");
+        }
+    }
     return 0;
 }
 template<class T1>void read(T1 &r_e_a_d) {
@@ -73,4 +83,7 @@ template<class T1>void write(T1 w_r_i_t_e) {
             putchar((w_r_i_t_e%10)+'0');
         }
     }
+}
+bool check(int b, int t) {
+    return (k[b]==k[b+t])&&(k[b]==k[b+(t<<1)])&&(k[b]!=-1);
 }

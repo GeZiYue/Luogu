@@ -14,32 +14,46 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar (' ')
 #define EL putchar ('\n')
-#define N 200005
+#define inf 2147483647
+#define N 25
+#define M 2000005
+#define Mod 998244353
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
-deque<int>q;
-int a[N], dp[N];
+char ch[N];
+int dp[N];
+int c[N][N];
 int main () {
-    int n, l, r;
+    int n;
+    int m;
     read(n);
-    ++n;
-    read(l);
-    read(r);
+    read(m);
+    c[0][0]=1;
     for (int i=1; i<=n; ++i) {
-        read(a[i]);
+        c[i][0]=1;
+        for (int j=1; j<=i; ++j) {
+            c[i][j]=c[i-1][j-1]+c[i-1][j];
+        }
+    }
+    dp[0]=1;
+    for (int i=1; i<=n; ++i) {
+        for (int j=0; j<i; ++j) {
+            dp[i]=(dp[i]+dp[j]*1ll*c[i][j]%Mod)%Mod;
+        }
     }
     int ans=0;
-    for (int i=l+1; i<=n; ++i) {
-        while (!q.empty()&&dp[i-l]>=dp[q.front()]) {
-            q.pop_front();
+    for (int i=1; i<=m; ++i) {
+        int cnt=0;
+        int k;
+        scanf("%s", ch+1);
+        for (int j=1; j<=n; ++j) {
+            if (ch[j]-'0') {
+                ++cnt;
+            }
         }
-        q.push_front(i-l);
-        while (i-q.back()>r) {
-            q.pop_back();
-        }
-        dp[i]=dp[q.back()]+a[i];
-        ans=max(ans, dp[i]);
+        read(k);
+        ans=(ans+k*1ll%Mod*dp[cnt]%Mod*dp[n-cnt]%Mod)%Mod;
     }
     write(ans);
     EL;

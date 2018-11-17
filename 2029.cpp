@@ -14,32 +14,36 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar (' ')
 #define EL putchar ('\n')
-#define N 200005
+#define inf 2147483647
+#define N 5005
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
-deque<int>q;
-int a[N], dp[N];
+int s[N], b[N];
+int dp[2][N];
 int main () {
-    int n, l, r;
+    int n, m;
     read(n);
-    ++n;
-    read(l);
-    read(r);
+    read(m);
     for (int i=1; i<=n; ++i) {
-        read(a[i]);
+        read(s[i]);
+    }
+    for (int i=1; i<=n; ++i) {
+        read(b[i]);
+    }
+    for (int i=1; i<=n; ++i) {
+        dp[i&1][0]=dp[~i&1][0]-s[i];
+        for (int j=1; j<=i; ++j) {
+            if (j%m) {
+                dp[i&1][j]=max(dp[~i&1][j-1]+s[i], dp[~i&1][j]-s[i]);
+            }else {
+                dp[i&1][j]=max(dp[~i&1][j-1]+s[i]+b[i], dp[~i&1][j]-s[i]);
+            }
+        }
     }
     int ans=0;
-    for (int i=l+1; i<=n; ++i) {
-        while (!q.empty()&&dp[i-l]>=dp[q.front()]) {
-            q.pop_front();
-        }
-        q.push_front(i-l);
-        while (i-q.back()>r) {
-            q.pop_back();
-        }
-        dp[i]=dp[q.back()]+a[i];
-        ans=max(ans, dp[i]);
+    for (int i=0; i<=n; ++i) {
+        ans=max(ans, dp[n&1][i]);
     }
     write(ans);
     EL;

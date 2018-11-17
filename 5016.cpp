@@ -14,34 +14,38 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar (' ')
 #define EL putchar ('\n')
-#define N 200005
+#define inf 2147483647
+#define N 100005
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
+typedef long long int ll;
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
-deque<int>q;
-int a[N], dp[N];
+int a[N];
+ll ans[N];
 int main () {
-    int n, l, r;
+    int n;
     read(n);
-    ++n;
-    read(l);
-    read(r);
     for (int i=1; i<=n; ++i) {
         read(a[i]);
     }
-    int ans=0;
-    for (int i=l+1; i<=n; ++i) {
-        while (!q.empty()&&dp[i-l]>=dp[q.front()]) {
-            q.pop_front();
-        }
-        q.push_front(i-l);
-        while (i-q.back()>r) {
-            q.pop_back();
-        }
-        dp[i]=dp[q.back()]+a[i];
-        ans=max(ans, dp[i]);
+    int m, p1, s1, s2;
+    read(m);
+    read(p1);
+    read(s1);
+    read(s2);
+    a[p1]+=s1;
+    ll sum=0;
+    for (int i=1; i<=n; ++i) {
+        sum+=(m-i)*1ll*a[i];
     }
-    write(ans);
+    int mini=1;
+    for (int i=1; i<=n; ++i) {
+        ans[i]=sum+(m-i)*1ll*s2;
+        if (abs(ans[i])<abs(ans[mini])) {
+            mini=i;
+        }
+    }
+    write(mini);
     EL;
     return 0;
 }
@@ -55,7 +59,7 @@ template<class T1>void read(T1 &r_e_a_d) {
         }
         ch=getchar();
     }
-    while (isNum(ch) ) {
+    while (isNum(ch)) {
         k=(k<<1)+(k<<3)+ch-'0';
         ch=getchar();
     }

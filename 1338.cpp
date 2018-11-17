@@ -14,35 +14,32 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar (' ')
 #define EL putchar ('\n')
-#define N 200005
+#define inf 2147483647
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
-deque<int>q;
-int a[N], dp[N];
+queue<int>q1;
+stack<int>q2;
 int main () {
-    int n, l, r;
+    int n, m;
     read(n);
-    ++n;
-    read(l);
-    read(r);
+    read(m);
     for (int i=1; i<=n; ++i) {
-        read(a[i]);
-    }
-    int ans=0;
-    for (int i=l+1; i<=n; ++i) {
-        while (!q.empty()&&dp[i-l]>=dp[q.front()]) {
-            q.pop_front();
+        if (m<=(n-i)*1ll*(n-i-1)/2) {
+            q1.push(i);
+        }else {
+            q2.push(i);
+            m-=(n-q1.size()-q2.size());
         }
-        q.push_front(i-l);
-        while (i-q.back()>r) {
-            q.pop_back();
-        }
-        dp[i]=dp[q.back()]+a[i];
-        ans=max(ans, dp[i]);
     }
-    write(ans);
-    EL;
+    while (!q1.empty()) {
+        write(q1.front());SP;
+        q1.pop();
+    }
+    while (!q2.empty()) {
+        write(q2.top());SP;
+        q2.pop();
+    }
     return 0;
 }
 template<class T1>void read(T1 &r_e_a_d) {
@@ -55,7 +52,7 @@ template<class T1>void read(T1 &r_e_a_d) {
         }
         ch=getchar();
     }
-    while (isNum(ch) ) {
+    while (isNum(ch)) {
         k=(k<<1)+(k<<3)+ch-'0';
         ch=getchar();
     }

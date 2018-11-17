@@ -14,32 +14,60 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar (' ')
 #define EL putchar ('\n')
-#define N 200005
+#define inf 2147483647
+#define N 505
+#define M 4000005
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
-deque<int>q;
-int a[N], dp[N];
+int a[M];
+int b[N];
+int c[N];
+int dp[M];
 int main () {
-    int n, l, r;
+    int n, m;
     read(n);
-    ++n;
-    read(l);
-    read(r);
+    read(m);
     for (int i=1; i<=n; ++i) {
-        read(a[i]);
+        read(b[i]);
     }
-    int ans=0;
-    for (int i=l+1; i<=n; ++i) {
-        while (!q.empty()&&dp[i-l]>=dp[q.front()]) {
-            q.pop_front();
+    sort(b+1, b+n+1);
+    ++a[b[1]];
+    c[1]=b[1];
+    int maxi=0;
+    int mini=c[1];
+    for (int i=2; i<=n; ++i) {
+        if (b[i]>b[i-1]+(m<<1)) {
+            c[i]=c[i-1]+(m<<1);
+        }else {
+            c[i]=c[i-1]+b[i]-b[i-1];
         }
-        q.push_front(i-l);
-        while (i-q.back()>r) {
-            q.pop_back();
+        ++a[c[i]];
+        maxi=max(maxi, c[i]);
+    }
+    memset(dp, -1, sizeof(dp));
+    dp[mini]=0;
+    for (int i=mini+1, now=0, sum=1; i<mini+m; ++i) {
+        now+=sum;
+        dp[i]=now;
+        sum+=a[i];
+    }
+    for (int i=mini+m; i<maxi+m; ++i) {
+        int now=0;
+        for (int j=i-1; j>i-m; --j) {
+            now+=(i-j)*a[j];
         }
-        dp[i]=dp[q.back()]+a[i];
-        ans=max(ans, dp[i]);
+        dp[i]=inf;
+        for (int j=i-m; j>=max(0, i-(m<<1)); --j) {
+            if (~dp[j]) {
+                dp[i]=min(dp[i], dp[j]+now);
+            }
+            now+=(i-j)*a[j];
+        }
+    }
+    int ans=inf;
+    for (int i=maxi; i<maxi+m; ++i) {
+        ans=min(ans, dp[i]);
     }
     write(ans);
     EL;
@@ -55,7 +83,7 @@ template<class T1>void read(T1 &r_e_a_d) {
         }
         ch=getchar();
     }
-    while (isNum(ch) ) {
+    while (isNum(ch)) {
         k=(k<<1)+(k<<3)+ch-'0';
         ch=getchar();
     }

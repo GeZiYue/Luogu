@@ -14,35 +14,47 @@ using namespace std;
 #define isNum(a) (a>='0'&&a<='9')
 #define SP putchar (' ')
 #define EL putchar ('\n')
-#define N 200005
+#define inf 2147483647
+#define N 15
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T1>inline void read(T1&);
 template<class T1>inline void write(T1);
-deque<int>q;
-int a[N], dp[N];
+int f[N][N];
+int a[N];
 int main () {
-    int n, l, r;
+    int n, sum;
+    bool flag=false;
     read(n);
-    ++n;
-    read(l);
-    read(r);
+    read(sum);
     for (int i=1; i<=n; ++i) {
-        read(a[i]);
-    }
-    int ans=0;
-    for (int i=l+1; i<=n; ++i) {
-        while (!q.empty()&&dp[i-l]>=dp[q.front()]) {
-            q.pop_front();
+        f[i][1]=1;
+        for (int j=2; j<=i; ++j) {
+            f[i][j]=f[i-1][j]+f[i-1][j-1];
         }
-        q.push_front(i-l);
-        while (i-q.back()>r) {
-            q.pop_back();
-        }
-        dp[i]=dp[q.back()]+a[i];
-        ans=max(ans, dp[i]);
     }
-    write(ans);
-    EL;
+    for (int i=1; i<=n; ++i) {
+        a[i]=i;
+    }
+    do {
+        int now=0;
+        for (int i=1; i<=n; ++i) {
+            now+=a[i]*f[n][i];
+            if (now>sum) {
+                sort(a+i+1, a+n+1, greater<int>());
+                break;
+            }
+        }
+        if (now==sum) {
+            flag=true;
+            break;
+        }
+    }while (next_permutation(a+1, a+n+1));
+    if (flag) {
+        for (int i=1; i<=n; ++i) {
+            write(a[i]);SP;
+        }
+        EL;
+    }
     return 0;
 }
 template<class T1>void read(T1 &r_e_a_d) {
@@ -55,7 +67,7 @@ template<class T1>void read(T1 &r_e_a_d) {
         }
         ch=getchar();
     }
-    while (isNum(ch) ) {
+    while (isNum(ch)) {
         k=(k<<1)+(k<<3)+ch-'0';
         ch=getchar();
     }
