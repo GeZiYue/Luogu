@@ -15,7 +15,7 @@ using namespace std;
 #define SP putchar (' ')
 #define EL putchar ('\n')
 #define inf 2147483647
-#define N 200005
+#define N 1000005
 #define ls(x) (x<<1)
 #define rs(x) (x<<1|1)
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
@@ -23,31 +23,30 @@ template<class T>inline void read(T&);
 template<class Fir, class... Res>void read(Fir&, Res&...);
 template<class T>inline void write(const T&);
 template<class Fir, class... Res>void write(const Fir&, const Res&...);
-void PushUp(int);
-void Build(int, int, int);
-int Query(int, int, int, int, int);
-void Update(int, int, int, int, int);
-int maxn[N<<2];
-int a[N];
+typedef const int& ci;
+void PushUp(ci);
+void PushDown(ci);
+void Build(ci, ci, ci);
+void Update(ci, ci, ci, ci, ci, ci);
+int minn[N<<2], tag[N<<2];
+int r[N];
 int main () {
     int n, m;
     read(n, m);
     for (int i=1; i<=n; ++i) {
-        read(a[i]);
+        read(r[i]);
     }
     Build(1, 1, n);
     for (int i=1; i<=m; ++i) {
-        char ch;
-        int l, r;
-        cin>>ch;
-        read(l, r);
-        if (ch=='Q') {
-            write(Query(1, 1, n, l, r));
-            EL;
-        }else {
-            Update(1, 1, n, l, r);
+        int d, s, t;
+        read(d, s, t);
+        Update(1, 1, n, s, t, -d);
+        if (minn[1]<0) {
+            write(-1);EL;write(i);EL;return 0;
         }
     }
+    write(0);
+    EL;
     return 0;
 }
 template<class T>void read(T &Re) {
@@ -88,12 +87,21 @@ template<class Fir, class... Res>void write(const Fir& Fi, const Res&... Re) {
     putchar(' ');
     write(Re...);
 }
-void PushUp(int x) {
-    maxn[x]=max(maxn[ls(x)], maxn[rs(x)]);
+void PushUp(ci x) {
+    minn[x]=min(minn[ls(x)], minn[rs(x)]);
 }
-void Build(int x, int xL, int xR) {
+void PushDown(ci x) {
+    if (tag[x]) {
+        minn[ls(x)]+=tag[x];
+        minn[rs(x)]+=tag[x];
+        tag[ls(x)]+=tag[x];
+        tag[rs(x)]+=tag[x];
+        tag[x]=0;
+    }
+}
+void Build(ci x, ci xL, ci xR) {
     if (xL==xR) {
-        maxn[x]=a[xL];
+        minn[x]=r[xL];
         return;
     }
     int xM=(xL+xR)>>1;
@@ -101,26 +109,18 @@ void Build(int x, int xL, int xR) {
     Build(rs(x), xM+1, xR);
     PushUp(x);
 }
-int Query(int x, int xL, int xR, int qL, int qR) {
-    if (xL>=qL&&xR<=qR) {
-        return maxn[x];
-    }
-    if (xL>qR||xR<qL) {
-        return 0;
-    }
-    int xM=(xL+xR)>>1;
-    return max(Query(ls(x), xL, xM, qL, qR), Query(rs(x), xM+1, xR, qL, qR));
-}
-void Update(int x, int xL, int xR, int q, int num) {
-    if (xL>q||xR<q) {
+void Update(ci x, ci xL, ci xR, ci uL, ci uR, ci num) {
+    if (xL>=uL&&xR<=uR) {
+        minn[x]+=num;
+        tag[x]+=num;
         return;
     }
-    if (xL==xR) {
-        maxn[x]=max(maxn[x], num);
+    if (xL>uR||xR<uL) {
         return;
     }
+    PushDown(x);
     int xM=(xL+xR)>>1;
-    Update(ls(x), xL, xM, q, num);
-    Update(rs(x), xM+1, xR, q, num);
+    Update(ls(x), xL, xM, uL, uR, num);
+    Update(rs(x), xM+1, xR, uL, uR, num);
     PushUp(x);
 }

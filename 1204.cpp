@@ -15,39 +15,49 @@ using namespace std;
 #define SP putchar (' ')
 #define EL putchar ('\n')
 #define inf 2147483647
-#define N 200005
-#define ls(x) (x<<1)
-#define rs(x) (x<<1|1)
+#define N 5005
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T>inline void read(T&);
 template<class Fir, class... Res>void read(Fir&, Res&...);
 template<class T>inline void write(const T&);
 template<class Fir, class... Res>void write(const Fir&, const Res&...);
-void PushUp(int);
-void Build(int, int, int);
-int Query(int, int, int, int, int);
-void Update(int, int, int, int, int);
-int maxn[N<<2];
-int a[N];
-int main () {
-    int n, m;
-    read(n, m);
-    for (int i=1; i<=n; ++i) {
-        read(a[i]);
+class Node {
+public:
+    int num;
+    int k;
+    bool operator<(Node i) {
+        if (num==i.num) {
+            return k>i.k;
+        }
+        return num<i.num;
     }
-    Build(1, 1, n);
-    for (int i=1; i<=m; ++i) {
-        char ch;
-        int l, r;
-        cin>>ch;
-        read(l, r);
-        if (ch=='Q') {
-            write(Query(1, 1, n, l, r));
-            EL;
+}a[N<<1];
+int main () {
+    int n;
+    read(n);
+    for (int i=1; i<=n; ++i) {
+        read(a[i].num);
+        a[i].k=1;
+        read(a[i+n].num);
+        a[i+n].k=-1;
+    }
+    sort(a+1, a+(n<<1)+1);
+    int beg=a[1].num;
+    int ans1=0, ans2=0;
+    int now=1;
+    for (int i=2; i<=(n<<1); ++i) {
+        if (now==0) {
+            ans2=max(ans2, a[i].num-a[i-1].num);
+            now+=a[i].k;
+            beg=a[i].num;
         }else {
-            Update(1, 1, n, l, r);
+            now+=a[i].k;
+            if (now==0) {
+                ans1=max(ans1, a[i].num-beg);
+            }
         }
     }
+    write(ans1, ans2);EL;
     return 0;
 }
 template<class T>void read(T &Re) {
@@ -87,40 +97,4 @@ template<class Fir, class... Res>void write(const Fir& Fi, const Res&... Re) {
     write(Fi);
     putchar(' ');
     write(Re...);
-}
-void PushUp(int x) {
-    maxn[x]=max(maxn[ls(x)], maxn[rs(x)]);
-}
-void Build(int x, int xL, int xR) {
-    if (xL==xR) {
-        maxn[x]=a[xL];
-        return;
-    }
-    int xM=(xL+xR)>>1;
-    Build(ls(x), xL, xM);
-    Build(rs(x), xM+1, xR);
-    PushUp(x);
-}
-int Query(int x, int xL, int xR, int qL, int qR) {
-    if (xL>=qL&&xR<=qR) {
-        return maxn[x];
-    }
-    if (xL>qR||xR<qL) {
-        return 0;
-    }
-    int xM=(xL+xR)>>1;
-    return max(Query(ls(x), xL, xM, qL, qR), Query(rs(x), xM+1, xR, qL, qR));
-}
-void Update(int x, int xL, int xR, int q, int num) {
-    if (xL>q||xR<q) {
-        return;
-    }
-    if (xL==xR) {
-        maxn[x]=max(maxn[x], num);
-        return;
-    }
-    int xM=(xL+xR)>>1;
-    Update(ls(x), xL, xM, q, num);
-    Update(rs(x), xM+1, xR, q, num);
-    PushUp(x);
 }

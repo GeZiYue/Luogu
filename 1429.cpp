@@ -16,38 +16,30 @@ using namespace std;
 #define EL putchar ('\n')
 #define inf 2147483647
 #define N 200005
-#define ls(x) (x<<1)
-#define rs(x) (x<<1|1)
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
 template<class T>inline void read(T&);
 template<class Fir, class... Res>void read(Fir&, Res&...);
 template<class T>inline void write(const T&);
 template<class Fir, class... Res>void write(const Fir&, const Res&...);
-void PushUp(int);
-void Build(int, int, int);
-int Query(int, int, int, int, int);
-void Update(int, int, int, int, int);
-int maxn[N<<2];
-int a[N];
+class Point {
+public:
+    double x, y;
+}a[N];
+double dis(const Point&, const Point&);
+double work(const int&, const int&);
 int main () {
-    int n, m;
-    read(n, m);
+    int n;
+    read(n);
     for (int i=1; i<=n; ++i) {
-        read(a[i]);
+        cin>>a[i].x>>a[i].y;
     }
-    Build(1, 1, n);
-    for (int i=1; i<=m; ++i) {
-        char ch;
-        int l, r;
-        cin>>ch;
-        read(l, r);
-        if (ch=='Q') {
-            write(Query(1, 1, n, l, r));
-            EL;
-        }else {
-            Update(1, 1, n, l, r);
+    sort(a+1, a+n+1, [](const Point& i, const Point& j) {
+        if (i.x==j.x) {
+            return i.y<=j.y;
         }
-    }
+        return i.x<=j.x;
+    });
+    printf("%.4f\n", work(1, n));
     return 0;
 }
 template<class T>void read(T &Re) {
@@ -88,39 +80,32 @@ template<class Fir, class... Res>void write(const Fir& Fi, const Res&... Re) {
     putchar(' ');
     write(Re...);
 }
-void PushUp(int x) {
-    maxn[x]=max(maxn[ls(x)], maxn[rs(x)]);
+double dis(const Point& x, const Point& y) {
+    return sqrt((x.x-y.x)*(x.x-y.x)+(x.y-y.y)*(x.y-y.y));
 }
-void Build(int x, int xL, int xR) {
-    if (xL==xR) {
-        maxn[x]=a[xL];
-        return;
+double work(const int& l, const int& r) {
+    double d=inf;
+    if (l==r) {
+        return d;
     }
-    int xM=(xL+xR)>>1;
-    Build(ls(x), xL, xM);
-    Build(rs(x), xM+1, xR);
-    PushUp(x);
-}
-int Query(int x, int xL, int xR, int qL, int qR) {
-    if (xL>=qL&&xR<=qR) {
-        return maxn[x];
+    if (l+1==r) {
+        return dis(a[l], a[r]);
     }
-    if (xL>qR||xR<qL) {
-        return 0;
+    int m=(l+r)>>1;
+    d=min(work(l, m), work(m+1, r));
+    vector<int>ans;
+    for (int i=l; i<=r; ++i) {
+        if (abs(a[m].x-a[i].x)<=d) {
+            ans.push_back(i);
+        }
     }
-    int xM=(xL+xR)>>1;
-    return max(Query(ls(x), xL, xM, qL, qR), Query(rs(x), xM+1, xR, qL, qR));
-}
-void Update(int x, int xL, int xR, int q, int num) {
-    if (xL>q||xR<q) {
-        return;
+    sort(ans.begin(), ans.end(), [](const int& i, const int& j) {
+        return a[i].y<a[j].y;
+    });
+    for (unsigned i=0; i<ans.size()-1; ++i) {
+        for (unsigned j=i+1; j<ans.size()&&a[ans[j]].y-a[ans[i]].y<d; ++j) {
+            d=min(d, dis(a[ans[i]], a[ans[j]]));
+        }
     }
-    if (xL==xR) {
-        maxn[x]=max(maxn[x], num);
-        return;
-    }
-    int xM=(xL+xR)>>1;
-    Update(ls(x), xL, xM, q, num);
-    Update(rs(x), xM+1, xR, q, num);
-    PushUp(x);
+    return d;
 }

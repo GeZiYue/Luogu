@@ -15,7 +15,7 @@ using namespace std;
 #define SP putchar (' ')
 #define EL putchar ('\n')
 #define inf 2147483647
-#define N 200005
+#define N 50005
 #define ls(x) (x<<1)
 #define rs(x) (x<<1|1)
 #define File(a) freopen(a".in", "r", stdin), freopen(a".out", "w", stdout)
@@ -23,31 +23,36 @@ template<class T>inline void read(T&);
 template<class Fir, class... Res>void read(Fir&, Res&...);
 template<class T>inline void write(const T&);
 template<class Fir, class... Res>void write(const Fir&, const Res&...);
-void PushUp(int);
-void Build(int, int, int);
-int Query(int, int, int, int, int);
-void Update(int, int, int, int, int);
-int maxn[N<<2];
-int a[N];
+class SegmentTree {
+public:
+    int sum[N];
+    int tag[N];
+    int cnt;
+    void PushUp(int);
+    void PushDown(int, int, int);
+    void Build(int, int, int);
+    void Plant(int, int, int, int, int);
+    void Remove(int, int, int, int, int);
+}t1, t2;
 int main () {
     int n, m;
     read(n, m);
-    for (int i=1; i<=n; ++i) {
-        read(a[i]);
-    }
-    Build(1, 1, n);
+    ++n;
+    t1.Build(1, 1, n);
+    t2.Build(1, 1, n);
     for (int i=1; i<=m; ++i) {
-        char ch;
-        int l, r;
-        cin>>ch;
-        read(l, r);
-        if (ch=='Q') {
-            write(Query(1, 1, n, l, r));
-            EL;
+        int mod, l, r;
+        read(mod, l, r);
+        ++l, ++r;
+        if (mod) {
+            t1.Plant(1, 1, n, l, r);
         }else {
-            Update(1, 1, n, l, r);
+            t1.Remove(1, 1, n, l, r);
+            t2.Remove(1, 1, n, l, r);
         }
     }
+    write(t1.sum[1]-t2.sum[1]);EL;
+    write(t1.cnt-t2.cnt);EL;
     return 0;
 }
 template<class T>void read(T &Re) {
@@ -88,12 +93,25 @@ template<class Fir, class... Res>void write(const Fir& Fi, const Res&... Re) {
     putchar(' ');
     write(Re...);
 }
-void PushUp(int x) {
-    maxn[x]=max(maxn[ls(x)], maxn[rs(x)]);
+void SegmentTree::PushUp(int x) {
+    sum[x]=sum[ls(x)]+sum[rs(x)];
 }
-void Build(int x, int xL, int xR) {
+void SegmentTree::PushDown(int x, int xL, int xR) {
+    if (tag[x]==1) {
+        int xM=(xL+xR)>>1;
+        sum[ls(x)]=xM-xL+1;
+        sum[rs(x)]=xR-xM;
+        tag[ls(x)]=tag[rs(x)]=1;
+    }
+    if (tag[x]==-1) {
+        sum[ls(x)]=sum[rs(x)]=0;
+        tag[ls(x)]=tag[rs(x)]=-1;
+    }
+    tag[x]=0;
+}
+void SegmentTree::Build(int x, int xL, int xR) {
     if (xL==xR) {
-        maxn[x]=a[xL];
+        sum[x]=1;
         return;
     }
     int xM=(xL+xR)>>1;
@@ -101,26 +119,34 @@ void Build(int x, int xL, int xR) {
     Build(rs(x), xM+1, xR);
     PushUp(x);
 }
-int Query(int x, int xL, int xR, int qL, int qR) {
-    if (xL>=qL&&xR<=qR) {
-        return maxn[x];
+void SegmentTree::Plant(int x, int xL, int xR, int uL, int uR) {
+    if (xL>=uL&&xR<=uR) {
+        sum[x]=xR-xL+1;
+        tag[x]=1;
+        return;
     }
-    if (xL>qR||xR<qL) {
-        return 0;
+    if (xL>uR||xR<uL) {
+        return;
     }
+    PushDown(x, xL, xR);
     int xM=(xL+xR)>>1;
-    return max(Query(ls(x), xL, xM, qL, qR), Query(rs(x), xM+1, xR, qL, qR));
+    Plant(ls(x), xL, xM, uL, uR);
+    Plant(rs(x), xM+1, xR, uL, uR);
+    PushUp(x);
 }
-void Update(int x, int xL, int xR, int q, int num) {
-    if (xL>q||xR<q) {
+void SegmentTree::Remove(int x, int xL, int xR, int uL, int uR) {
+    if (xL>=uL&&xR<=uR) {
+        cnt+=sum[x];
+        sum[x]=0;
+        tag[x]=-1;
         return;
     }
-    if (xL==xR) {
-        maxn[x]=max(maxn[x], num);
+    if (xL>uR||xR<uL) {
         return;
     }
+    PushDown(x, xL, xR);
     int xM=(xL+xR)>>1;
-    Update(ls(x), xL, xM, q, num);
-    Update(rs(x), xM+1, xR, q, num);
+    Remove(ls(x), xL, xM, uL, uR);
+    Remove(rs(x), xM+1, xR, uL, uR);
     PushUp(x);
 }
