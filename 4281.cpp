@@ -31,31 +31,43 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 500005, M = 1000005;
+const int N = 500005;
+const int M = 1000005;
+
+int hed[N], nxt[M], to[M], id;
+int fa[N], dep[N], siz[N], son[N], top[N];
 
 void add(int, int);
 void dfs1(int);
 void dfs2(int);
 int lca(int, int);
 
-int hed[N], nxt[M], to[M], id;
-int dep[N], fa[N], son[N], siz[N], top[N];
-
 int main () {
-    int n, m, root;
-    read(n), read(m), read(root);
+    int n, m;
+    read(n), read(m);
     for (int i = 1; i < n; ++i) {
         int u, v;
         read(u), read(v);
         add(u, v), add(v, u);
     }
-    dfs1(root);
-    top[root] = root;
-    dfs2(root);
+    dfs1(1);
+    top[1] = 1;
+    dfs2(1);
     for (int i = 1; i <= m; ++i) {
-        int a, b;
-        read(a), read(b);
-        write(lca(a, b)), EL;
+        int a, b, c;
+        read(a), read(b), read(c);
+        int la = lca(a, b), lb = lca(b, c), lc = lca(c, a);
+        int ans;
+        if (la == lb) {
+            ans = lc;
+        } else {
+            if (la == lc) {
+                ans = lb;
+            } else {
+                ans = la;
+            }
+        }
+        write(ans), SP, write(dep[a] + dep[b] + dep[c] - dep[la] - dep[lb] - dep[lc]), EL;
     }
     return 0;
 }
@@ -102,7 +114,8 @@ void dfs1(int u) {
     for (int i = hed[u]; i; i = nxt[i]) {
         int v = to[i];
         if (v ^ fa[u]) {
-            fa[v] = u, dep[v] = dep[u] + 1;
+            fa[v] = u;
+            dep[v] = dep[u] + 1;
             dfs1(v);
             siz[u] += siz[v];
             if (siz[v] > siz[son[u]]) {
@@ -112,25 +125,24 @@ void dfs1(int u) {
     }
 }
 void dfs2(int u) {
-    if (!son[u]) {
-        return;
+    if (son[u]) {
+        top[son[u]] = top[u];
+        dfs2(son[u]);
     }
-    top[son[u]] = top[u];
-    dfs2(son[u]);
-    for (int i = hed[u]; i; i = nxt[i]) {
+    for (int i = hed[u]; i ; i = nxt[i]) {
         int v = to[i];
-        if (v ^ fa[u] && v ^ son[u]) {
+        if (v ^ son[u] && v ^ fa[u]) {
             top[v] = v;
             dfs2(v);
         }
     }
 }
-int lca(int a, int b) {
-    while (top[a] ^ top[b]) {
-        if (dep[top[a]] < dep[top[b]]) {
-            a ^= b ^= a ^= b;
+int lca(int x, int y) {
+    while (top[x] ^ top[y]) {
+        if (dep[top[x]] < dep[top[y]]) {
+            x ^= y ^= x ^= y;
         }
-        a = fa[top[a]];
+        x = fa[top[x]];
     }
-    return dep[a] < dep[b] ? a : b;
+    return dep[x] < dep[y] ? x : y;
 }
