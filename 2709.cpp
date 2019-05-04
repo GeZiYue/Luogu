@@ -31,31 +31,53 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 500005, M = 1000005;
+const int N = 50005;
 
-void add(int, int);
-void dfs1(int);
-void dfs2(int);
-int lca(int, int);
+class Query {
+public:
+    int id, l, r;
+    friend bool operator<(Query, Query);
+}q[N];
 
-int hed[N], nxt[M], to[M], id;
-int dep[N], fa[N], son[N], siz[N], top[N];
+void add(int);
+void del(int);
+
+int col[N];
+int cnt[N];
+int ans[N];
+int B;
+int len, now;
 
 int main () {
-    int n, m, root;
-    read(n), read(m), read(root);
-    for (int i = 1; i < n; ++i) {
-        int u, v;
-        read(u), read(v);
-        add(u, v), add(v, u);
+    int n, m, k;
+    read(n), read(m), read(k);
+    B = n / sqrt(m);
+    for (int i = 1; i <= n; ++i) {
+        read(col[i]);
     }
-    dfs1(root);
-    top[root] = root;
-    dfs2(root);
     for (int i = 1; i <= m; ++i) {
-        int a, b;
-        read(a), read(b);
-        write(lca(a, b)), EL;
+        q[i].id = i;
+        read(q[i].l), read(q[i].r);
+    }
+    sort(q + 1, q + m + 1);
+    int l = 1, r = 0;
+    for (int i = 1; i <= m; ++i) {
+        while (l > q[i].l) {
+            add(--l);
+        }
+        while (l < q[i].l) {
+            del(l++);
+        }
+        while (r > q[i].r) {
+            del(r--);
+        }
+        while (r < q[i].r) {
+            add(++r);
+        }
+        ans[q[i].id] = now;
+    }
+    for (int i = 1; i <= m; ++i) {
+        write(ans[i]), EL;
     }
     return 0;
 }
@@ -92,45 +114,16 @@ void write(const T &Wr) {
     }
 }
 
-void add(int u, int v) {
-    nxt[++id] = hed[u];
-    hed[u] = id;
-    to[id] = v;
+bool operator<(Query i, Query j) {
+    return i.l / B == j.l / B ? i.r < j.r : i.l < j.l;
 }
-void dfs1(int u) {
-    siz[u] = 1;
-    for (int i = hed[u]; i; i = nxt[i]) {
-        int v = to[i];
-        if (v != fa[u]) {
-            fa[v] = u, dep[v] = dep[u] + 1;
-            dfs1(v);
-            siz[u] += siz[v];
-            if (siz[v] > siz[son[u]]) {
-                son[u] = v;
-            }
-        }
-    }
+void add(int x) {
+    now += 2 * cnt[col[x]] + 1;
+    ++cnt[col[x]];
+    ++len;
 }
-void dfs2(int u) {
-    if (!son[u]) {
-        return;
-    }
-    top[son[u]] = top[u];
-    dfs2(son[u]);
-    for (int i = hed[u]; i; i = nxt[i]) {
-        int v = to[i];
-        if (v != fa[u] && v != son[u]) {
-            top[v] = v;
-            dfs2(v);
-        }
-    }
-}
-int lca(int a, int b) {
-    while (top[a] ^ top[b]) {
-        if (dep[top[a]] < dep[top[b]]) {
-            a ^= b ^= a ^= b;
-        }
-        a = fa[top[a]];
-    }
-    return dep[a] < dep[b] ? a : b;
+void del(int x) {
+    now -= 2 * cnt[col[x]] - 1;
+    --cnt[col[x]];
+    --len;
 }

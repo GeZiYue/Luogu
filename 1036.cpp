@@ -31,32 +31,28 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 500005, M = 1000005;
+const int N = 25;
 
-void add(int, int);
-void dfs1(int);
-void dfs2(int);
-int lca(int, int);
+void pri(int);
+bool isp(int);
+void dfs();
 
-int hed[N], nxt[M], to[M], id;
-int dep[N], fa[N], son[N], siz[N], top[N];
+int p[1005], id;
+bool ip[1005];
+int now, sum, res;
+int ans;
+int n, k;
+int a[N];
 
 int main () {
-    int n, m, root;
-    read(n), read(m), read(root);
-    for (int i = 1; i < n; ++i) {
-        int u, v;
-        read(u), read(v);
-        add(u, v), add(v, u);
+    pri(1000);
+    read(n), read(k);
+    res = k;
+    for (int i = 1; i <= n; ++i) {
+        read(a[i]);
     }
-    dfs1(root);
-    top[root] = root;
-    dfs2(root);
-    for (int i = 1; i <= m; ++i) {
-        int a, b;
-        read(a), read(b);
-        write(lca(a, b)), EL;
-    }
+    dfs();
+    write(ans), EL;
     return 0;
 }
 
@@ -92,45 +88,40 @@ void write(const T &Wr) {
     }
 }
 
-void add(int u, int v) {
-    nxt[++id] = hed[u];
-    hed[u] = id;
-    to[id] = v;
-}
-void dfs1(int u) {
-    siz[u] = 1;
-    for (int i = hed[u]; i; i = nxt[i]) {
-        int v = to[i];
-        if (v != fa[u]) {
-            fa[v] = u, dep[v] = dep[u] + 1;
-            dfs1(v);
-            siz[u] += siz[v];
-            if (siz[v] > siz[son[u]]) {
-                son[u] = v;
+void pri(int n) {
+    for (int i = 2; i <= n; ++i) {
+        if (!ip[i]) {
+            p[++id] = i;
+        }
+        for (int j = 1; j <= id && p[j] * i <= n; ++j) {
+            ip[p[j] * i] = true;
+            if (i % p[j] == 0) {
+                break;
             }
         }
     }
 }
-void dfs2(int u) {
-    if (!son[u]) {
+bool isp(int x) {
+    for (int i = 1; i <= id && p[i] * p[i] <= x; ++i) {
+        if (x % p[i] == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+void dfs() {
+    if (!res) {
+        if (isp(sum)) {
+            ++ans;
+        }
         return;
     }
-    top[son[u]] = top[u];
-    dfs2(son[u]);
-    for (int i = hed[u]; i; i = nxt[i]) {
-        int v = to[i];
-        if (v != fa[u] && v != son[u]) {
-            top[v] = v;
-            dfs2(v);
-        }
+    for (int i = now + 1; i <= n - res + 1; ++i) {
+        now = i;
+        --res;
+        sum += a[i];
+        dfs();
+        sum -= a[i];
+        ++res;
     }
-}
-int lca(int a, int b) {
-    while (top[a] ^ top[b]) {
-        if (dep[top[a]] < dep[top[b]]) {
-            a ^= b ^= a ^= b;
-        }
-        a = fa[top[a]];
-    }
-    return dep[a] < dep[b] ? a : b;
 }

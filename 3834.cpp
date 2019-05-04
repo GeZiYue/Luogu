@@ -31,31 +31,41 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 500005, M = 1000005;
+const int N = 200005;
 
-void add(int, int);
-void dfs1(int);
-void dfs2(int);
-int lca(int, int);
+class Node {
+public:
+    int val;
+    int ls, rs;
+} tree[N * 20];
+int cnt;
 
-int hed[N], nxt[M], to[M], id;
-int dep[N], fa[N], son[N], siz[N], top[N];
+void insert(int&, int, int, int);
+int query(int, int, int, int, int);
+
+pii a[N];
+int rnk[N];
+int root[N];
 
 int main () {
-    int n, m, root;
-    read(n), read(m), read(root);
-    for (int i = 1; i < n; ++i) {
-        int u, v;
-        read(u), read(v);
-        add(u, v), add(v, u);
+    int n, m;
+    read(n), read(m);
+    for (int i = 1; i <= n; ++i) {
+        read(a[i].first);
+        a[i].second = i;
     }
-    dfs1(root);
-    top[root] = root;
-    dfs2(root);
+    sort(a + 1, a + n + 1);
+    for (int i = 1; i <= n; ++i) {
+        rnk[a[i].second] = i;
+    }
+    for (int i = 1; i <= n; ++i) {
+        root[i] = root[i - 1];
+        insert(root[i], 1, n, rnk[i]);
+    }
     for (int i = 1; i <= m; ++i) {
-        int a, b;
-        read(a), read(b);
-        write(lca(a, b)), EL;
+        int l, r, k;
+        read(l), read(r), read(k);
+        write(a[query(root[l - 1], root[r], 1, n, k)].first), EL;
     }
     return 0;
 }
@@ -92,45 +102,29 @@ void write(const T &Wr) {
     }
 }
 
-void add(int u, int v) {
-    nxt[++id] = hed[u];
-    hed[u] = id;
-    to[id] = v;
-}
-void dfs1(int u) {
-    siz[u] = 1;
-    for (int i = hed[u]; i; i = nxt[i]) {
-        int v = to[i];
-        if (v != fa[u]) {
-            fa[v] = u, dep[v] = dep[u] + 1;
-            dfs1(v);
-            siz[u] += siz[v];
-            if (siz[v] > siz[son[u]]) {
-                son[u] = v;
-            }
-        }
-    }
-}
-void dfs2(int u) {
-    if (!son[u]) {
+void insert(int &x, int xl, int xr, int ins) {
+    tree[++cnt]=tree[x];
+    x = cnt;
+    ++tree[x].val;
+    if (xl == xr) {
         return;
     }
-    top[son[u]] = top[u];
-    dfs2(son[u]);
-    for (int i = hed[u]; i; i = nxt[i]) {
-        int v = to[i];
-        if (v != fa[u] && v != son[u]) {
-            top[v] = v;
-            dfs2(v);
-        }
+    int xm = (xl + xr) >> 1;
+    if (ins <= xm) {
+        insert(tree[x].ls, xl, xm, ins);
+    } else {
+        insert(tree[x].rs, xm + 1, xr, ins);
     }
 }
-int lca(int a, int b) {
-    while (top[a] ^ top[b]) {
-        if (dep[top[a]] < dep[top[b]]) {
-            a ^= b ^= a ^= b;
-        }
-        a = fa[top[a]];
+int query(int lx, int rx, int xl, int xr, int k) {
+    if (xl == xr) {
+        return xl;
     }
-    return dep[a] < dep[b] ? a : b;
+    int xm = (xl + xr) >> 1;
+    int now = tree[tree[rx].ls].val - tree[tree[lx].ls].val;
+    if (k <= now) {
+        return query(tree[lx].ls, tree[rx].ls, xl, xm, k);
+    } else {
+        return query(tree[lx].rs, tree[rx].rs, xm + 1, xr, k - now);
+    }
 }
