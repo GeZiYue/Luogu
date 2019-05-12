@@ -31,12 +31,24 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
+const int N = 10000005;
+
+void getp(int);
+
+int p[N], id;
+int phi[N];
+ll sum[N];
+bool isp[N];
 
 int main () {
-    int a, b;
-    read(a),
-    read(b);
-    write(a + b), EL;
+    int n;
+    read(n);
+    getp(n);
+    long long ans = 0;
+    for (int i = 1; i <= id; ++i) {
+        ans += sum[n / p[i]] * 2 - 1;
+    }
+    write(ans), EL;
     return 0;
 }
 
@@ -68,6 +80,26 @@ void write(const T &Wr) {
         } else {
             write(Wr / 10);
             putchar((Wr % 10) + '0');
+        }
+    }
+}
+
+void getp(int n) {
+    sum[1] = phi[1] = 1;
+    for (int i = 2; i <= n; ++i) {
+        if (!isp[i]) {
+            p[++id] = i;
+            phi[i] = i - 1;
+        }
+        sum[i] = sum[i - 1] + phi[i];
+        for (int j = 1; j <= id && i * p[j] <= n; ++j) {
+            isp[i * p[j]] = true;
+            if (i % p[j] == 0) {
+                phi[i * p[j]] = phi[i] * p[j];
+                break;
+            } else {
+                phi[i * p[j]] = phi[i] * (p[j] - 1);
+            }
         }
     }
 }
