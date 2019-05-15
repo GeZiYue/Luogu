@@ -38,7 +38,6 @@ const int N = 100005, M = 200005;
 void add(int, int);
 void dfs1(int);
 void dfs2(int);
-void treebuild(int, int, int);
 int treequery(int, int, int, int, int);
 void treeupdate(int, int, int, int);
 int query(int, int);
@@ -62,7 +61,9 @@ int main () {
     dfs1(1);
     top[1] = 1;
     dfs2(1);
-    treebuild(1, 1, n);
+    for (int i = 1; i <= (N << 2) - 10; ++i) {
+        fir[i] = iinf;
+    }
     for (int i = 1; i <= q; ++i) {
         int mod, x;
         read(mod),
@@ -146,16 +147,6 @@ void dfs2(int u) {
 void pushup(int x) {
     fir[x] = min(fir[ls(x)], fir[rs(x)]);
 }
-void treebuild(int x, int xl, int xr) {
-    if (xl == xr) {
-        fir[x] = iinf;
-        return;
-    }
-    int xm = (xl + xr) >> 1;
-    treebuild(ls(x), xl, xm),
-    treebuild(rs(x), xm + 1, xr);
-    return;
-}
 int treequery(int x, int xl, int xr, int ql, int qr) {
     if (xl >= ql && xr <= qr) {
         return fir[x];
@@ -195,12 +186,9 @@ int query(int x, int y) {
         ans = min(ans, treequery(1, 1, n, num[top[x]], num[x]));
         x = fa[top[x]];
     }
-    if (x == y) {
-        return ans;
+    if (dep[x] < dep[y]) {
+        x ^= y ^= x ^= y;
     }
     ans = min(ans, treequery(1, 1, n, num[y], num[x]));
-    if (ans == iinf) {
-        ans = -1;
-    }
-    return ans;
+    return ans == iinf ? -1 : rnk[ans];
 }
