@@ -31,12 +31,11 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 200005;
+const int N = 500005;
 
 class Node {
 public:
-    int val;
-    int ls, rs;
+    int ls, rs, val;
 } tree[N * 20];
 int cnt;
 
@@ -44,28 +43,38 @@ void insert(int&, int, int, int);
 int query(int, int, int, int, int);
 
 pii a[N];
-int rnk[N];
-int root[N];
+int rnk[N], root[N];
+int num[N];
 
 int main () {
     int n, m;
-    read(n), read(m);
+    read(n),
+    read(m);
     for (int i = 1; i <= n; ++i) {
         read(a[i].first);
         a[i].second = i;
     }
     sort(a + 1, a + n + 1);
-    for (int i = 1; i <= n; ++i) {
-        rnk[a[i].second] = i;
+    int siz = 1;
+    rnk[a[1].second] = 1;
+    num[1] = a[1].first;
+    for (int i = 2; i <= n; ++i) {
+        if (a[i].first == a[i - 1].first) {
+            rnk[a[i].second] = siz;
+        } else {
+            rnk[a[i].second] = ++siz;
+            num[siz] = a[i].first;
+        }
     }
     for (int i = 1; i <= n; ++i) {
         root[i] = root[i - 1];
-        insert(root[i], 1, n, rnk[i]);
+        insert(root[i], 1, siz, rnk[i]);
     }
     for (int i = 1; i <= m; ++i) {
-        int l, r, k;
-        read(l), read(r), read(k);
-        write(a[query(root[l - 1], root[r], 1, n, k)].first), EL;
+        int l, r;
+        read(l),
+        read(r);
+        write(num[query(root[l - 1], root[r], 1, siz, r - l + 1)]), EL;
     }
     return 0;
 }
@@ -116,15 +125,14 @@ void insert(int &x, int xl, int xr, int ins) {
         insert(tree[x].rs, xm + 1, xr, ins);
     }
 }
-int query(int lx, int rx, int xl, int xr, int k) {
+int query(int lx, int rx, int xl, int xr, int len) {
     if (xl == xr) {
         return xl;
     }
     int xm = (xl + xr) >> 1;
-    int now = tree[tree[rx].ls].val - tree[tree[lx].ls].val;
-    if (k <= now) {
-        return query(tree[lx].ls, tree[rx].ls, xl, xm, k);
-    } else {
-        return query(tree[lx].rs, tree[rx].rs, xm + 1, xr, k - now);
-    }
+    return ((tree[tree[rx].ls].val - tree[tree[lx].ls].val) << 1) > len ?
+    query(tree[lx].ls, tree[rx].ls, xl, xm, len) :
+    ((tree[tree[rx].rs].val - tree[tree[lx].rs].val) << 1) > len ?
+    query(tree[lx].rs, tree[rx].rs, xm + 1, xr, len) :
+    0;
 }
