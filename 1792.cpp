@@ -33,37 +33,42 @@ using std::abs;
 using std::sort;
 const int N = 200005;
 
-int find(int);
-void uni(int, int);
+void del(int);
 
-int fa[N], maxi[N];
-int id;
+int pre[N], nxt[N];
+int a[N];
+bool flag[N];
+std::priority_queue<pii> pq;
 
 int main () {
 	int n, m;
 	read(n), read(m);
-    int lastans = 0;
-    for (int i = 1; i <= n; ++i) {
-        char ch = getchar();
-        if (ch != 'A' && ch != 'Q') {
-            ch = getchar();
-        }
-        ll a;
-        read(a);
-        if (ch == 'A') {
-            ++id;
-            fa[id] = id;
-            maxi[id] = (a + lastans) % m;
-            int fi = find(id);
-            while (fi > 1 && maxi[fi] > maxi[find(fi - 1)]) {
-                uni(fi - 1, fi);
-                fi = find(id);
-            }
-        } else {
-            lastans = maxi[find(id - a + 1)];
-            write(lastans), EL;
-        }
-    }
+	if ((m << 1) > n) {
+		puts("Error!");
+		return 0;
+	}
+	for (int i = 1; i <= n; ++i) {
+		read(a[i]);
+		pre[i] = i - 1;
+		nxt[i] = i + 1;
+		flag[i] = true;
+		pq.push(pii(a[i], i));
+	}
+	pre[1] = n;
+	nxt[n] = 1;
+	int ans = 0;
+	for (int i = 1; i <= m; ++i) {
+		while (!flag[pq.top().second]) {
+			pq.pop();
+		}
+		pii now = pq.top();
+		pq.pop();
+		ans += now.first;
+		a[now.second] = a[pre[now.second]] + a[nxt[now.second]] - a[now.second];
+		pq.push(pii(a[now.second], now.second));
+		del(pre[now.second]), del(nxt[now.second]);
+	}
+	write(ans), EL;
     return 0;
 }
 
@@ -99,11 +104,8 @@ void write(const T &Wr) {
     }
 }
 
-int find(int x) {
-    return fa[x] == x ? x : fa[x] = find(fa[x]);
-}
-void uni(int x, int y) {
-    int fx = find(x), fy = find(y);
-    fa[fy] = fx;
-    maxi[fx] = maxi[fy];
+void del(int x) {
+	pre[nxt[x]] = pre[x];
+	nxt[pre[x]] = nxt[x];
+	flag[x] = false;
 }

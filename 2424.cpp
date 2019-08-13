@@ -22,8 +22,8 @@ template<class T>
 inline void write(const T&);
 
 typedef long long ll;
-typedef const long long & cll;
-typedef const int & ci;
+typedef unsigned long long ull;
+typedef const int& ci;
 typedef std::pair<int, int> pii;
 const int iinf = 2147483647;
 const ll llinf = 9223372036854775807ll;
@@ -31,39 +31,13 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 200005;
 
-int find(int);
-void uni(int, int);
-
-int fa[N], maxi[N];
-int id;
+ll sum(int);
 
 int main () {
-	int n, m;
-	read(n), read(m);
-    int lastans = 0;
-    for (int i = 1; i <= n; ++i) {
-        char ch = getchar();
-        if (ch != 'A' && ch != 'Q') {
-            ch = getchar();
-        }
-        ll a;
-        read(a);
-        if (ch == 'A') {
-            ++id;
-            fa[id] = id;
-            maxi[id] = (a + lastans) % m;
-            int fi = find(id);
-            while (fi > 1 && maxi[fi] > maxi[find(fi - 1)]) {
-                uni(fi - 1, fi);
-                fi = find(id);
-            }
-        } else {
-            lastans = maxi[find(id - a + 1)];
-            write(lastans), EL;
-        }
-    }
+    int l, r;
+    read(l), read(r);
+    write(sum(r) - sum(l - 1)), EL;
     return 0;
 }
 
@@ -99,11 +73,14 @@ void write(const T &Wr) {
     }
 }
 
-int find(int x) {
-    return fa[x] == x ? x : fa[x] = find(fa[x]);
-}
-void uni(int x, int y) {
-    int fx = find(x), fy = find(y);
-    fa[fy] = fx;
-    maxi[fx] = maxi[fy];
+ll sum(int n) {
+    if (n <= 1) {
+        return n;
+    }
+    ll ans = 0;
+    for (ll l = 1, r; l <= n; l = r + 1) {
+        r = n / (n / l);
+        ans += (n / l) * ((l + r) * (r - l + 1) / 2);
+    }
+    return ans;
 }

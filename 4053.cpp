@@ -31,39 +31,45 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 200005;
+const int N = 150005;
 
-int find(int);
-void uni(int, int);
+class Node {
+public:
+	int t1, t2;
+}a[N];
 
-int fa[N], maxi[N];
-int id;
+bool cmp(const Node &i, const Node &j) {
+	return i.t2 < j.t2;
+}
+
+std::priority_queue<int> pq;
 
 int main () {
-	int n, m;
-	read(n), read(m);
-    int lastans = 0;
-    for (int i = 1; i <= n; ++i) {
-        char ch = getchar();
-        if (ch != 'A' && ch != 'Q') {
-            ch = getchar();
-        }
-        ll a;
-        read(a);
-        if (ch == 'A') {
-            ++id;
-            fa[id] = id;
-            maxi[id] = (a + lastans) % m;
-            int fi = find(id);
-            while (fi > 1 && maxi[fi] > maxi[find(fi - 1)]) {
-                uni(fi - 1, fi);
-                fi = find(id);
-            }
-        } else {
-            lastans = maxi[find(id - a + 1)];
-            write(lastans), EL;
-        }
-    }
+	int n;
+	read(n);
+	for (int i = 1; i <= n; ++i) {
+		read(a[i].t1), read(a[i].t2);
+	}
+	std::sort(a + 1, a + n + 1, cmp);
+	ll T = 0;
+	int ans = 0;
+	for (int i = 1; i <= n; ++i) {
+		if (T + a[i].t1 <= a[i].t2) {
+			T += a[i].t1;
+			pq.push(a[i].t1);
+			++ans;
+		} else {
+			if (!pq.empty()) {
+				int t = pq.top();
+				if (t > a[i].t1 && T - t + a[i].t1 <= a[i].t2) {
+					T = T - t + a[i].t1;
+					pq.pop();
+					pq.push(a[i].t1);
+				}
+			}
+		}
+	}
+	write(ans), EL;
     return 0;
 }
 
@@ -97,13 +103,4 @@ void write(const T &Wr) {
             putchar((Wr % 10) + '0');
         }
     }
-}
-
-int find(int x) {
-    return fa[x] == x ? x : fa[x] = find(fa[x]);
-}
-void uni(int x, int y) {
-    int fx = find(x), fy = find(y);
-    fa[fy] = fx;
-    maxi[fx] = maxi[fy];
 }

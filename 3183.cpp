@@ -22,8 +22,8 @@ template<class T>
 inline void write(const T&);
 
 typedef long long ll;
-typedef const long long & cll;
-typedef const int & ci;
+typedef unsigned long long ull;
+typedef const int& ci;
 typedef std::pair<int, int> pii;
 const int iinf = 2147483647;
 const ll llinf = 9223372036854775807ll;
@@ -31,39 +31,54 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 200005;
+const int N = 100005;
+const int M = 200005;
 
-int find(int);
-void uni(int, int);
+void add(int, int);
 
-int fa[N], maxi[N];
-int id;
+int hed[N], nxt[M], to[M], id;
+int deg[N];
+int sum[N];
+bool vis[N];
+bool lon[N];
+std::queue<int> q;
 
 int main () {
-	int n, m;
-	read(n), read(m);
-    int lastans = 0;
+    int n, m;
+    read(n), read(m);
+    for (int i = 1; i <= m; ++i) {
+        int u, v;
+        read(u), read(v);
+        add(u, v);
+        ++deg[v];
+    }
     for (int i = 1; i <= n; ++i) {
-        char ch = getchar();
-        if (ch != 'A' && ch != 'Q') {
-            ch = getchar();
-        }
-        ll a;
-        read(a);
-        if (ch == 'A') {
-            ++id;
-            fa[id] = id;
-            maxi[id] = (a + lastans) % m;
-            int fi = find(id);
-            while (fi > 1 && maxi[fi] > maxi[find(fi - 1)]) {
-                uni(fi - 1, fi);
-                fi = find(id);
-            }
-        } else {
-            lastans = maxi[find(id - a + 1)];
-            write(lastans), EL;
+        if (!deg[i]) {
+            sum[i] = 1;
+            vis[i] = true;
+            lon[i] = true;
+            q.push(i);
         }
     }
+    int ans = 0;
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        for (int i = hed[u]; i; i = nxt[i]) {
+            int v = to[i];
+            if (!vis[v]) {
+                sum[v] += sum[u];
+                --deg[v];
+                if (!deg[v]) {
+                    q.push(v);
+                }
+            }
+        }
+        if (!hed[u] && !lon[u]) {
+            ans += sum[u];
+        }
+    }
+    write(ans), EL;
     return 0;
 }
 
@@ -99,11 +114,8 @@ void write(const T &Wr) {
     }
 }
 
-int find(int x) {
-    return fa[x] == x ? x : fa[x] = find(fa[x]);
-}
-void uni(int x, int y) {
-    int fx = find(x), fy = find(y);
-    fa[fy] = fx;
-    maxi[fx] = maxi[fy];
+void add(int u, int v) {
+    nxt[++id] = hed[u];
+    hed[u] = id;
+    to[id] = v;
 }

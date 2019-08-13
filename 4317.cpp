@@ -22,8 +22,8 @@ template<class T>
 inline void write(const T&);
 
 typedef long long ll;
-typedef const long long & cll;
-typedef const int & ci;
+typedef unsigned long long ull;
+typedef const int& ci;
 typedef std::pair<int, int> pii;
 const int iinf = 2147483647;
 const ll llinf = 9223372036854775807ll;
@@ -31,39 +31,37 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 200005;
+const int N = 65;
+const int Mod = 10000007;
 
-int find(int);
-void uni(int, int);
+ll pow(ll, ll);
+ll get(int);
 
-int fa[N], maxi[N];
+ll f[N][N];
+bool num[N];
 int id;
 
 int main () {
-	int n, m;
-	read(n), read(m);
-    int lastans = 0;
-    for (int i = 1; i <= n; ++i) {
-        char ch = getchar();
-        if (ch != 'A' && ch != 'Q') {
-            ch = getchar();
-        }
-        ll a;
-        read(a);
-        if (ch == 'A') {
-            ++id;
-            fa[id] = id;
-            maxi[id] = (a + lastans) % m;
-            int fi = find(id);
-            while (fi > 1 && maxi[fi] > maxi[find(fi - 1)]) {
-                uni(fi - 1, fi);
-                fi = find(id);
-            }
-        } else {
-            lastans = maxi[find(id - a + 1)];
-            write(lastans), EL;
+    ll n;
+    read(n);
+    ll now = n + 1;
+    while (now) {
+        num[++id] = now & 1;
+        now >>= 1;
+    }
+    for (int i = 0; i <= id; ++i) {
+        f[i][0] = 1;
+    }
+    for (int i = 1; i <= id; ++i) {
+        for (int j = 1; j <= i; ++j) {
+            f[i][j] = f[i - 1][j] + f[i - 1][j - 1];
         }
     }
+    ll ans = 1;
+    for (int i = 1; i <= id; ++i) {
+        ans = ans * pow(i, get(i)) % Mod;
+    }
+    write(ans), EL;
     return 0;
 }
 
@@ -99,11 +97,26 @@ void write(const T &Wr) {
     }
 }
 
-int find(int x) {
-    return fa[x] == x ? x : fa[x] = find(fa[x]);
+ll pow(ll a, ll b) {
+    int ans = 1, now = a % Mod;
+    while (b) {
+        if (b & 1) {
+            ans = ans * 1ll * now % Mod;
+        }
+        now = now * 1ll * now % Mod;
+        b >>= 1;
+    }
+    return ans;
 }
-void uni(int x, int y) {
-    int fx = find(x), fy = find(y);
-    fa[fy] = fx;
-    maxi[fx] = maxi[fy];
+ll get(int x) {
+    ll ans = 0;
+    for (int i = id; i >= 1; --i) {
+        if (num[i]) {
+            ans = ans + f[i - 1][x--];
+        }
+        if (x < 0) {
+            break;
+        }
+    }
+    return ans;
 }

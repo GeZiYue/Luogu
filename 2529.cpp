@@ -31,38 +31,36 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 200005;
 
-int find(int);
-void uni(int, int);
+void div5();
 
-int fa[N], maxi[N];
-int id;
+char ch[105];
+int a[105];
+int len;
+int f[25] = {1, 1, 2, 6, 4, 2, 2, 4, 2, 8, 4, 4, 8, 4, 6, 8, 8, 6, 8, 2};
 
 int main () {
-	int n, m;
-	read(n), read(m);
-    int lastans = 0;
-    for (int i = 1; i <= n; ++i) {
-        char ch = getchar();
-        if (ch != 'A' && ch != 'Q') {
-            ch = getchar();
+    for (int i = 1; i <= 5; ++i) {
+        scanf("%s", ch + 1);
+        len = strlen(ch + 1);
+        for (int i = 1; i <= len; ++i) {
+            a[i] = ch[len - i + 1] - '0';
         }
-        ll a;
-        read(a);
-        if (ch == 'A') {
-            ++id;
-            fa[id] = id;
-            maxi[id] = (a + lastans) % m;
-            int fi = find(id);
-            while (fi > 1 && maxi[fi] > maxi[find(fi - 1)]) {
-                uni(fi - 1, fi);
-                fi = find(id);
+        int ans = 1;
+        while (len > 1) {
+            ans = ans * f[a[2] % 2 * 10 + a[1]] % 10;
+            int num = 0;
+            for (int i = len; i >= 1; --i) {
+                a[i] = num * 10 + a[i];
+                num = a[i] % 5;
+                a[i] /= 5;
             }
-        } else {
-            lastans = maxi[find(id - a + 1)];
-            write(lastans), EL;
+            while (len && !a[len]) {
+                --len;
+            }
         }
+        ans = ans * f[a[1]] % 10;
+        write(ans), EL;
     }
     return 0;
 }
@@ -97,13 +95,4 @@ void write(const T &Wr) {
             putchar((Wr % 10) + '0');
         }
     }
-}
-
-int find(int x) {
-    return fa[x] == x ? x : fa[x] = find(fa[x]);
-}
-void uni(int x, int y) {
-    int fx = find(x), fy = find(y);
-    fa[fy] = fx;
-    maxi[fx] = maxi[fy];
 }
