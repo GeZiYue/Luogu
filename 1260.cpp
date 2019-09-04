@@ -36,47 +36,39 @@ using std::max;
 using std::abs;
 using std::sort;
 const int N = 1005;
-const int M = 3005;
+const int M = 10005;
 
-void add(int, int, double);
-bool check(double);
+void add(int, int, int);
+bool SPFA(int);
 
-int hed[N], nxt[M], to[M], id;
-double dis[M];
-int u[N], v[N], flag[N];
-int num[N], C[N];
-bool type[N];
-double delta[N];
+int hed[N], nxt[M], to[M], dis[M], id;
+int delta[N];
 bool vis[N];
 int cnt[N];
-int n, m, k;
+int Point;
 
 int main () {
-  read(n), read(m), read(k);
+  int n, m;
+  read(n), read(m);
   for (int i = 1; i <= m; ++i) {
-    int t;
-    read(t);
-    type[i] = t - 1;
-    read(u[i]), read(v[i]), read(flag[i]);
+    int u, v, w;
+    read(u), read(v), read(w);
+    add(v, u, w);
   }
-  for (int i = 1; i <= k; ++i) {
-    read(num[i]), read(C[i]);
+  for (int i = 1; i <= n; ++i) {
+    add(n + 1, i, 0);
   }
-  double l = 0, r = 1e20;
-  double ans = -1;
-  while (r - l >= 1e-8) {
-    double mid = (r + l) / 2;
-    if (check(mid)) {
-      l = ans = mid;
-    } else {
-      r = mid;
-    }
-  }
-  if (ans == -1) {
-    puts("-1");
+  Point = n + 1;
+  if (!SPFA(n + 1)) {
+    puts("NO SOLUTION");
   } else {
-    std::cout.precision(8);
-    std::cout << std::fixed << ans << std::endl;
+    int mina = iinf;
+    for (int i = 1; i <= n; ++i) {
+      mina = min(mina, delta[i]);
+    }
+    for (int i = 1; i <= n; ++i) {
+      write(delta[i] - mina), EL;      
+    }
   }
   return 0;
 }
@@ -113,44 +105,34 @@ inline void write(const T &Wr) {
   }
 }
 
-inline void add(int u, int v, double w) {
+void add(int u, int v, int w) {
   nxt[++id] = hed[u];
   hed[u] = id;
   to[id] = v;
   dis[id] = w;
 }
-bool check(double t) {
-  id = 0;
-  memset(hed, 0, sizeof(hed));
-  for (int i = 1; i <= m; ++i) {
-    if (type[i]) {
-      add(v[i], u[i], 1.0 / (flag[i] + t));
-    } else {
-      add(v[i], u[i], flag[i] - t);
-    }
-  }
-  for (int i = 1; i <= k; ++i) {
-    add(0, num[i], C[i]);
-    add(num[i], 0, 1.0 / C[i]);
-  }
-  std::queue<int> q;
-  for (int i = 0; i <= n; ++i) {
-    delta[i] = 1;
-    vis[i] = true;
+bool SPFA(int S) {
+  for (int i = 1; i <= Point; ++i) {
+    delta[i] = iinf;
+    vis[i] = false;
     cnt[i] = 0;
-    q.push(i);
   }
+  delta[S] = 0;
+  std::queue<int> q;
+  q.push(S);
+  vis[S] = true;
+  cnt[S] = 1;
   while (!q.empty()) {
     int u = q.front();
     q.pop();
     vis[u] = false;
-    if (++cnt[u] == n + 2) {
-      return true;
+    if (++cnt[u] > Point) {
+      return false;
     }
     for (int i = hed[u]; i; i = nxt[i]) {
       int v = to[i];
-      if (delta[u] * dis[i] > delta[v]) {
-        delta[v] = delta[u] * dis[i];
+      if (delta[u] + dis[i] < delta[v]) {
+        delta[v] = delta[u] + dis[i];
         if (!vis[v]) {
           vis[v] = true;
           q.push(v);
@@ -158,5 +140,5 @@ bool check(double t) {
       }
     }
   }
-  return false;
+  return true;
 }
