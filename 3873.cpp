@@ -1,3 +1,5 @@
+#include <unordered_set>
+#include <unordered_map>
 #include <algorithm>
 #include <iostream>
 #include <cstring>
@@ -33,44 +35,42 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 100005;
-const int Mod = 1000000009;
-#define lowbit(x) (x & (-x))
+const int N = 105;
+const int Mod = 4147;
 
-void update(int, int);
-int query(int);
+void mult(int[N][N], int[N][N]);
 
-int BIT[N];
-pii sum[N];
-int a[N];
-int Siz;
+int n;
+int tmp[N][N];
+int a[N][N];
+int b[N][N];
+int ans[N][N];
 
 int main () {
-  int n;
-  read(n);
+  int m;
+  read(n), read(m);
   for (int i = 1; i <= n; ++i) {
-    read(sum[i].first);
-    sum[i].first += sum[i - 1].first;
-    sum[i].second = i;
+    read(b[i][1]);
   }
-  sort(sum, sum + n + 1);
-  a[sum[0].second] = 1;
   for (int i = 1; i <= n; ++i) {
-    if (sum[i].first != sum[i - 1].first) {
-      a[sum[i].second] = a[sum[i - 1].second] + 1;
-    } else {
-      a[sum[i].second] = a[sum[i - 1].second];
+    read(a[1][i]);
+  }
+  for (int i = 2; i <= n; ++i) {
+    a[i][i - 1] = 1;
+  }
+  for (int i = 1; i <= n; ++i) {
+    ans[i][i] = 1;
+  }
+  m -= n;
+  while (m) {
+    if (m & 1) {
+      mult(ans, a);
     }
+    mult(a, a);
+    m >>= 1;
   }
-  Siz = a[sum[n].second];
-  update(a[0], 1);
-  for (int i = 1; i <= n; ++i) {
-    int now = query(a[i]);
-    update(a[i], now);
-    if (i == n) {
-      write(now), EL;
-    }
-  }
+  mult(ans, b);
+  write(ans[1][1]), EL;
   return 0;
 }
 
@@ -106,17 +106,18 @@ inline void write(const T &Wr) {
   }
 }
 
-void update(int x, int num) {
-  while (x <= Siz) {
-    BIT[x] = (BIT[x] + num) % Mod;
-    x += lowbit(x);
+inline void mult(int a[N][N], int b[N][N]) {
+  for (int i = 1; i <= n; ++i) {
+    for (int j = 1; j <= n; ++j) {
+      tmp[i][j] = 0;
+      for (int k = 1; k <= n; ++k) {
+        tmp[i][j] = (tmp[i][j] + a[i][k] * b[k][j]) % Mod;
+      }
+    }
   }
-}
-int query(int x) {
-  int ans = 0;
-  while (x) {
-    ans = (ans + BIT[x]) % Mod;
-    x -= lowbit(x);
+  for (int i = 1; i <= n; ++i) {
+    for (int j = 1; j <= n; ++j) {
+      a[i][j] = tmp[i][j];
+    }
   }
-  return ans;
 }

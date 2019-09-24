@@ -1,3 +1,5 @@
+#include <unordered_set>
+#include <unordered_map>
 #include <algorithm>
 #include <iostream>
 #include <cstring>
@@ -33,44 +35,20 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 100005;
-const int Mod = 1000000009;
-#define lowbit(x) (x & (-x))
-
-void update(int, int);
-int query(int);
-
-int BIT[N];
-pii sum[N];
-int a[N];
-int Siz;
 
 int main () {
-  int n;
-  read(n);
-  for (int i = 1; i <= n; ++i) {
-    read(sum[i].first);
-    sum[i].first += sum[i - 1].first;
-    sum[i].second = i;
+  unsigned long long a, b;
+  read(a), read(b);
+  while (a <= b) {
+    a |= (a + 1);
   }
-  sort(sum, sum + n + 1);
-  a[sum[0].second] = 1;
-  for (int i = 1; i <= n; ++i) {
-    if (sum[i].first != sum[i - 1].first) {
-      a[sum[i].second] = a[sum[i - 1].second] + 1;
-    } else {
-      a[sum[i].second] = a[sum[i - 1].second];
-    }
+  a &= (a - 1);
+  int ans = 0;
+  while (a) {
+    ++ans;
+    a &= (a - 1);
   }
-  Siz = a[sum[n].second];
-  update(a[0], 1);
-  for (int i = 1; i <= n; ++i) {
-    int now = query(a[i]);
-    update(a[i], now);
-    if (i == n) {
-      write(now), EL;
-    }
-  }
+  write(ans), EL;
   return 0;
 }
 
@@ -104,19 +82,4 @@ inline void write(const T &Wr) {
       putchar((Wr % 10) + '0');
     }
   }
-}
-
-void update(int x, int num) {
-  while (x <= Siz) {
-    BIT[x] = (BIT[x] + num) % Mod;
-    x += lowbit(x);
-  }
-}
-int query(int x) {
-  int ans = 0;
-  while (x) {
-    ans = (ans + BIT[x]) % Mod;
-    x -= lowbit(x);
-  }
-  return ans;
 }
