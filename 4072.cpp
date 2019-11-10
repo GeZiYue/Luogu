@@ -33,39 +33,42 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 1000005;
+const int N = 3005;
 
-char s1[N], s2[N];
-int pi[N];
+int sqr(int);
+double calck(bool, int, int);
+
+int a[N];
+int s[N];
+int dp[2][N];
+int n, m;
+int que[N], hed, til;
 
 int main () {
-  scanf("%s\n%s", s2, s1);
-  int n = strlen(s1), m = strlen(s2);
-  for (int i = 1; i < n; ++i) {
-    int j = pi[i - 1];
-    while (j && s1[j] != s1[i]) {
-      j = pi[j - 1];
-    }
-    if (s1[j] == s1[i]) {
-      ++j;
-    }
-    pi[i] = j;
+  read(n), read(m);
+  for (int i = 1; i <= n; ++i) {
+    read(a[i]);
+    s[i] = s[i - 1] + a[i];
   }
-  for (int i = 0, j = 0; i < m; ++i) {
-    while (j && s1[j] != s2[i]) {
-      j = pi[j - 1];
-    }
-    if (s1[j] == s2[i]) {
-      ++j;
-    }
-    if (j == n) {
-      write(i - n + 2), EL;
+  bool now = 0;
+  for (int i = 1; i <= n; ++i) {
+    dp[now][i] = sqr(s[i]);
+  }
+  for (int k = 2; k <= m; ++k) {
+    que[hed = til = 1] = 0;
+    now ^= 1;
+    for (int i = 1; i <= n; ++i) {
+      while (hed < til && calck(now ^ 1, que[hed], que[hed + 1]) <= 2 * s[i]) {
+        ++hed;
+      }
+      dp[now][i] = dp[now ^ 1][que[hed]] + sqr(s[i] - s[que[hed]]);
+      while (hed < til && calck(now ^ 1, que[til - 1], que[til]) >= calck(now ^ 1, que[til], i)) {
+        --til;
+      }
+      que[++til] = i;
     }
   }
-  for (int i = 0; i < n; ++i) {
-    write(pi[i]), SP;
-  }
-  EL;
+  write(m * dp[now][n] - sqr(s[n]));
   return 0;
 }
 
@@ -99,4 +102,11 @@ inline void write(const T &Wr) {
       putchar((Wr % 10) + '0');
     }
   }
+}
+
+inline int sqr(int a) {
+  return a * a;
+}
+inline double calck(bool k, int i, int j) {
+  return (dp[k][i] * 1ll + sqr(s[i]) - dp[k][j] - sqr(s[j])) * 1.0 / (s[i] - s[j]);
 }

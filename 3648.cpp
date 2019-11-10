@@ -33,39 +33,50 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 1000005;
+const int N = 100005;
+const int K = 205;
 
-char s1[N], s2[N];
-int pi[N];
+double calck(bool, int, int);
+
+int a[N], sum[N];
+ll dp[2][N];
+int pre[K][N];
+int que[N], hed, til;
 
 int main () {
-  scanf("%s\n%s", s2, s1);
-  int n = strlen(s1), m = strlen(s2);
-  for (int i = 1; i < n; ++i) {
-    int j = pi[i - 1];
-    while (j && s1[j] != s1[i]) {
-      j = pi[j - 1];
-    }
-    if (s1[j] == s1[i]) {
-      ++j;
-    }
-    pi[i] = j;
+  int n, k;
+  read(n), read(k);
+  for (int i = 1; i <= n; ++i) {
+    read(a[i]);
+    sum[i] = sum[i - 1] + a[i];
   }
-  for (int i = 0, j = 0; i < m; ++i) {
-    while (j && s1[j] != s2[i]) {
-      j = pi[j - 1];
-    }
-    if (s1[j] == s2[i]) {
-      ++j;
-    }
-    if (j == n) {
-      write(i - n + 2), EL;
+  bool now = 1;
+  for (int i = 1; i <= k; ++i) {
+    now ^= 1;
+    que[hed = til = 1] = 0;
+    for (int j = 1; j <= n; ++j) {
+      while (hed < til && calck(now ^ 1, que[hed], que[hed + 1]) <= sum[j]) {
+        ++hed;
+      }
+      int k = que[hed];
+      pre[i][j] = k;
+      dp[now][j] = dp[now ^ 1][k] + (sum[j] - sum[k]) * 1ll * sum[k];
+      while (hed < til && calck(now ^ 1, que[til - 1], que[til]) >= calck(now ^ 1, que[til], j)) {
+        --til;
+      }
+      que[++til] = j;
     }
   }
-  for (int i = 0; i < n; ++i) {
-    write(pi[i]), SP;
+  write(dp[now][n]), EL;
+  {
+    int i = pre[k][n], j = k - 1;
+    while (i) {
+      write(i), SP;
+      i = pre[j][i];
+      --j;
+    }
+    EL;
   }
-  EL;
   return 0;
 }
 
@@ -99,4 +110,14 @@ inline void write(const T &Wr) {
       putchar((Wr % 10) + '0');
     }
   }
+}
+
+ll sqr(int a) {
+  return a * 1ll * a;
+}
+double calck(bool k, int i, int j) {
+  if (sum[j] == sum[i]) {
+    return -1e18;
+  }
+  return (dp[k][i] - dp[k][j] + sqr(sum[j]) - sqr(sum[i])) * 1.0 / (sum[j] - sum[i]);
 }

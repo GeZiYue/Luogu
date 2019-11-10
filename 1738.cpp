@@ -33,39 +33,31 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 1000005;
+const int N = 55;
 
-char s1[N], s2[N];
-int pi[N];
+std::map<std::string, bool> mp;
 
 int main () {
-  scanf("%s\n%s", s2, s1);
-  int n = strlen(s1), m = strlen(s2);
-  for (int i = 1; i < n; ++i) {
-    int j = pi[i - 1];
-    while (j && s1[j] != s1[i]) {
-      j = pi[j - 1];
+  int n;
+  int ans = 0;
+  read(n);
+  while (n--) {
+    std::string str;
+    std::cin >> str;
+    str.push_back('/');
+    int m = str.size();
+    std::string now;
+    for (int i = 1; i < m; ++i) {
+      if (str[i] == '/') {
+        if (!mp[now]) {
+          mp[now] = 1;
+          ++ans;
+        }
+      }
+      now += str[i];
     }
-    if (s1[j] == s1[i]) {
-      ++j;
-    }
-    pi[i] = j;
+    write(ans), EL;
   }
-  for (int i = 0, j = 0; i < m; ++i) {
-    while (j && s1[j] != s2[i]) {
-      j = pi[j - 1];
-    }
-    if (s1[j] == s2[i]) {
-      ++j;
-    }
-    if (j == n) {
-      write(i - n + 2), EL;
-    }
-  }
-  for (int i = 0; i < n; ++i) {
-    write(pi[i]), SP;
-  }
-  EL;
   return 0;
 }
 

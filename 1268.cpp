@@ -33,39 +33,32 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 1000005;
+const int N = 35;
 
-char s1[N], s2[N];
-int pi[N];
+int dis[N][N];
 
 int main () {
-  scanf("%s\n%s", s2, s1);
-  int n = strlen(s1), m = strlen(s2);
-  for (int i = 1; i < n; ++i) {
-    int j = pi[i - 1];
-    while (j && s1[j] != s1[i]) {
-      j = pi[j - 1];
+  while (true) {
+    int n;
+    read(n);
+    if (!n) {
+      break;
     }
-    if (s1[j] == s1[i]) {
-      ++j;
+    for (int i = 1; i <= n; ++i) {
+      for (int j = i + 1; j <= n; ++j) {
+        read(dis[i][j]);
+      }
     }
-    pi[i] = j;
+    int ans = dis[1][2];
+    for (int i = 3; i <= n; ++i) {
+      int tmp = iinf;
+      for (int j = 2; j < i; ++j) {
+        tmp = min(tmp, (dis[1][i] + dis[j][i] - dis[1][j]) >> 1);
+      }
+      ans += tmp;
+    }
+    write(ans), EL;
   }
-  for (int i = 0, j = 0; i < m; ++i) {
-    while (j && s1[j] != s2[i]) {
-      j = pi[j - 1];
-    }
-    if (s1[j] == s2[i]) {
-      ++j;
-    }
-    if (j == n) {
-      write(i - n + 2), EL;
-    }
-  }
-  for (int i = 0; i < n; ++i) {
-    write(pi[i]), SP;
-  }
-  EL;
   return 0;
 }
 

@@ -1,119 +1,143 @@
-#include<iostream>
-#include<cstdio>
-#include<cmath>
-#include<cstring>
-#include<cstdlib>
-#include<algorithm>
-#include<queue>
-using namespace std;
-#define isNum(a) (a>='0'&&a<='9')
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
+#include <complex>
+#include <cstdio>
+#include <string>
+#include <vector>
+#include <bitset>
+#include <cmath>
+#include <queue>
+#include <stack>
+#include <set>
+#include <map>
+
+#define isNum(a) (a >= '0' && a <= '9')
 #define SP putchar(' ')
 #define EL putchar('\n')
-#define N 500005
-#define CTI(a) ((a)-'a'+1)
-#define File(a) freopen(a".in","r",stdin),freopen(a".out","w",stdout)
-template<class T1>void read(T1 &r_e_a_d);
-template<class T1>void write(T1 w_r_i_t_e);
-class Tree_Char{
+#define File(a) freopen(a ".in", "r", stdin), freopen(a ".out", "w", stdout)
+
+template<class T>
+void read(T&);
+template<class T>
+void write(const T&);
+
+typedef long long ll;
+typedef const long long & cll;
+typedef const int & ci;
+typedef std::pair<int, int> pii;
+const int iinf = 2147483647;
+const ll llinf = 9223372036854775807ll;
+using std::min;
+using std::max;
+using std::abs;
+using std::sort;
+const int N = 1000005;
+
+class Aho_Corasick_automaton {
 public:
+  void insert(char *);
+  void build();
+  int query(char *);
+private:
+  class Node {
+  public:
     int fail;
     int end;
-    int vis[30];
+    int tr[26];
+  };
+  Node trie[N];
+  int id;
 };
-class Trie{
-private:
-    queue<int>q;
-    Tree_Char P[N];
-    int id;
-public:
-    Trie(){
-        id=0;
-    }
-    void Add(string);
-    void Build();
-    int Find(string);
-}AC;
-int main(){
-    int n,i;
-    string str;
-    read(n);
-    for(i=1;i<=n;i++){
-        cin>>str;
-        AC.Add(str);
-    }
-    AC.Build();
-    cin>>str;
-    write(AC.Find(str));
-    return 0;
+
+Aho_Corasick_automaton aca;
+char ch[N];
+
+int main () {
+  int n;
+  read(n);
+  for (int i = 1; i <= n; ++i) {
+    scanf("%s", ch);
+    aca.insert(ch);
+  }
+  aca.build();
+  scanf("%s", ch);
+  write(aca.query(ch)), EL;
+  return 0;
 }
-template<class T1>void read(T1 &r_e_a_d){
-    T1 k=0;
-    char ch=getchar();
-    int flag=1;
-    while(!isNum(ch)){
-        if(ch=='-'){
-            flag=-1;
-        }
-        ch=getchar();
+
+template<class T>
+inline void read(T &Re) {
+  T k = 0;
+  char ch = getchar();
+  int flag = 1;
+  while (!isNum(ch)) {
+    if (ch == '-') {
+      flag = -1;
     }
-    while(isNum(ch)){
-        k=(k<<1)+(k<<3)+ch-'0';
-        ch=getchar();
-    }
-    r_e_a_d=flag*k;
+    ch = getchar();
+  }
+  while (isNum(ch)) {
+    k = (k << 1) + (k << 3) + ch - '0';
+    ch = getchar();
+  }
+  Re = flag * k;
 }
-template<class T1>void write(T1 w_r_i_t_e){
-    if(w_r_i_t_e<0){
-        putchar('-');
-        write(-w_r_i_t_e);
-    }else{
-        if(w_r_i_t_e<10){
-            putchar(w_r_i_t_e+'0');
-        }else{
-            write(w_r_i_t_e/10);
-            putchar((w_r_i_t_e%10)+'0');
-        }
+template<class T>
+inline void write(const T &Wr) {
+  if (Wr < 0) {
+    putchar('-');
+    write(-Wr);
+  } else {
+    if (Wr < 10) {
+      putchar(Wr + '0');
+    } else {
+      write(Wr / 10);
+      putchar((Wr % 10) + '0');
     }
+  }
 }
-void Trie::Add(string str){
-    int i,len=str.size(),now=0;
-    for(i=0;i<len;i++){
-        if(P[now].vis[CTI(str[i])]==0){
-            P[now].vis[CTI(str[i])]=++id;
-        }
-        now=P[now].vis[CTI(str[i])];
-    }
-    P[now].end++;
+
+void Aho_Corasick_automaton::insert(char *ch) {
+  int n = strlen(ch);
+  int now = 0;
+  for (int i = 0; i < n; ++i) {
+    now = (trie[now].tr[ch[i] - 'a'] ? trie[now].tr[ch[i] - 'a'] : (trie[now].tr[ch[i] - 'a'] = ++id));
+  }
+  ++trie[now].end;
 }
-void Trie::Build(){
-    int i,now;
-    for(i=1;i<=26;i++){
-        if(P[0].vis[i]!=0){
-            P[P[0].vis[i]].fail=0;
-            q.push(P[0].vis[i]);
-        }
+void Aho_Corasick_automaton::build() {
+  std::queue<int> q;
+  for (int i = 0; i < 26; ++i) {
+    if (trie[0].tr[i]) {
+      trie[trie[0].tr[i]].fail = 0;
+      q.push(trie[0].tr[i]);
     }
-    while(!q.empty()){
-        now=q.front();
-        q.pop();
-        for(i=1;i<=26;i++){
-            if(P[now].vis[i]!=0){
-                P[P[now].vis[i]].fail=P[P[now].fail].vis[i];
-                q.push(P[now].vis[i]);
-            }else{
-                P[now].vis[i]=P[P[now].fail].vis[i];
-            }
-        }
+  }
+  while (!q.empty()) {
+    int u = q.front();
+    q.pop();
+    for (int i = 0; i < 26; ++i) {
+      if (trie[u].tr[i]) {
+        trie[trie[u].tr[i]].fail = trie[trie[u].fail].tr[i];
+        q.push(trie[u].tr[i]);
+      } else {
+        trie[u].tr[i] = trie[trie[u].fail].tr[i];
+      }
     }
+  }
 }
-int Trie::Find(string str){
-    int i,j,now=0,len=str.size(),ans=0;
-    for(i=0;i<len;i++){
-        now=P[now].vis[CTI(str[i])];
-        for(j=now;j&&P[j].end!=-1;j=P[j].fail){
-            ans+=P[j].end;
-            P[j].end=-1;
-        }
+int Aho_Corasick_automaton::query(char *ch) {
+  int n = strlen(ch);
+  int now = 0;
+  int ans = 0;
+  for (int i = 0; i < n; ++i) {
+    now = trie[now].tr[ch[i] - 'a'];
+    for (int j = now; j && (~trie[j].end); j = trie[j].fail) {
+      ans += trie[j].end;
+      trie[j].end = -1;
     }
-    return ans;
+  }
+  return ans;
 }

@@ -35,37 +35,24 @@ using std::abs;
 using std::sort;
 const int N = 1000005;
 
-char s1[N], s2[N];
+char ch[N];
 int pi[N];
 
 int main () {
-  scanf("%s\n%s", s2, s1);
-  int n = strlen(s1), m = strlen(s2);
+  int n;
+  read(n);
+  scanf("%s", ch);
   for (int i = 1; i < n; ++i) {
     int j = pi[i - 1];
-    while (j && s1[j] != s1[i]) {
+    while (j && ch[j] != ch[i]) {
       j = pi[j - 1];
     }
-    if (s1[j] == s1[i]) {
+    if (ch[j] == ch[i]) {
       ++j;
     }
     pi[i] = j;
   }
-  for (int i = 0, j = 0; i < m; ++i) {
-    while (j && s1[j] != s2[i]) {
-      j = pi[j - 1];
-    }
-    if (s1[j] == s2[i]) {
-      ++j;
-    }
-    if (j == n) {
-      write(i - n + 2), EL;
-    }
-  }
-  for (int i = 0; i < n; ++i) {
-    write(pi[i]), SP;
-  }
-  EL;
+  write(n - pi[n - 1]), EL;
   return 0;
 }
 
