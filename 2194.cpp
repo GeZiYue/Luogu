@@ -33,33 +33,40 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 1005;
-const int M = 1000005;
+const int N = 100005;
+const int M = 300005;
+const int Mod = 1000000007;
 
 void add(int, int);
-bool essay(int);
+void tarjan(int);
 
 int hed[N], nxt[M], to[M], id;
-int mat[N];
-bool use[N];
-int ans;
+int dfn[N], low[N], cnt;
+bool ins[N];
+std::stack<int> sta;
+int a[N];
+int num;
+int ans = 1;
 
 int main () {
-  int n, m, e;
-  read(n), read(m), read(e);
-  for (int i = 1; i <= e; ++i) {
+  int n;
+  read(n);
+  for (int i = 1; i <= n; ++i) {
+    read(a[i]);
+  }
+  int m;
+  read(m);
+  for (int i = 1; i <= m; ++i) {
     int u, v;
     read(u), read(v);
-    if (u > n || v > m) {
-      continue;
-    }
     add(u, v);
   }
   for (int i = 1; i <= n; ++i) {
-    memset(use, false, sizeof(use));
-    ans += essay(i);
+    if (!dfn[i]) {
+      tarjan(i);
+    }
   }
-  write(ans), EL;
+  write(num), SP, write(ans), EL;
   return 0;
 }
 
@@ -100,16 +107,38 @@ void add(int u, int v) {
   hed[u] = id;
   to[id] = v;
 }
-bool essay(int u) {
+void tarjan(int u) {
+  dfn[u] = low[u] = ++cnt;
+  ins[u] = true;
+  sta.push(u);
   for (int i = hed[u]; i; i = nxt[i]) {
     int v = to[i];
-    if (!use[v]) {
-      use[v] = true;
-      if (!mat[v] || essay(mat[v])) {
-        mat[v] = u;
-        return true;
+    if (!dfn[v]) {
+      tarjan(v);
+      low[u] = min(low[u], low[v]);
+    } else {
+      if (ins[v]) {
+        low[u] = min(low[u], dfn[v]);
       }
     }
   }
-  return false;
+  if (low[u] == dfn[u]) {
+    int i;
+    int mini = iinf, sum = 0;
+    do {
+      i = sta.top();
+      sta.pop();
+      ins[i] = false;
+      if (a[i] < mini) {
+        mini = a[i];
+        sum = 1;
+      } else {
+        if (a[i] == mini) {
+          ++sum;
+        }
+      }
+    } while (i != u);
+    num += mini;
+    ans = ans * 1ll * sum % Mod;
+  }
 }

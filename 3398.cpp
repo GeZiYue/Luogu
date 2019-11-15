@@ -33,33 +33,36 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 1005;
-const int M = 1000005;
+const int N = 100005;
+const int M = 200005;
 
 void add(int, int);
-bool essay(int);
+void dfs1(int);
+void dfs2(int);
+int lca(int, int);
+int dis(int, int);
 
 int hed[N], nxt[M], to[M], id;
-int mat[N];
-bool use[N];
-int ans;
+int fa[N], dep[N], siz[N], son[N], top[N];
+int n, q;
 
 int main () {
-  int n, m, e;
-  read(n), read(m), read(e);
-  for (int i = 1; i <= e; ++i) {
+  read(n), read(q);
+  for (int i = 1; i < n; ++i) {
     int u, v;
     read(u), read(v);
-    if (u > n || v > m) {
-      continue;
-    }
-    add(u, v);
+    add(u, v), add(v, u);
   }
-  for (int i = 1; i <= n; ++i) {
-    memset(use, false, sizeof(use));
-    ans += essay(i);
+  dfs1(1);
+  top[1] = 1;
+  dfs2(1);
+  for (int i = 1; i <= q; ++i) {
+    int a, b, c, d;
+    read(a), read(b), read(c), read(d);
+    int x = lca(a, b), y = lca(c, d);
+    putchar((dis(x, c) + dis(x, d) == dis(c, d) || dis(y, a) + dis(y, b) == dis(a, b)) ? 'Y' : 'N');
+    EL;
   }
-  write(ans), EL;
   return 0;
 }
 
@@ -100,16 +103,47 @@ void add(int u, int v) {
   hed[u] = id;
   to[id] = v;
 }
-bool essay(int u) {
+void dfs1(int u) {
+  siz[u] = 1;
   for (int i = hed[u]; i; i = nxt[i]) {
     int v = to[i];
-    if (!use[v]) {
-      use[v] = true;
-      if (!mat[v] || essay(mat[v])) {
-        mat[v] = u;
-        return true;
+    if (v != fa[u]) {
+      fa[v] = u;
+      dep[v] = dep[u] + 1;
+      dfs1(v);
+      siz[u] += siz[v];
+      if (siz[v] > siz[son[u]]) {
+        son[u] = v;
       }
     }
   }
-  return false;
+}
+void dfs2(int u) {
+  if (son[u]) {
+    top[son[u]] = top[u];
+    dfs2(son[u]);
+  }
+  for (int i = hed[u]; i; i = nxt[i]) {
+    int v = to[i];
+    if (v != fa[u] && v != son[u]) {
+      top[v] = v;
+      dfs2(v);
+    }
+  }
+}
+int lca(int x, int y) {
+  while (top[x] ^ top[y]) {
+    if (dep[top[x]] < dep[top[y]]) {
+      x ^= y ^= x ^= y;
+    }
+    x = fa[top[x]];
+  }
+  if (dep[x] < dep[y]) {
+    return x;
+  }
+  return y;
+}
+int dis(int u, int v) {
+  int x = lca(u, v);
+  return dep[u] + dep[v] - (dep[x] << 1);
 }

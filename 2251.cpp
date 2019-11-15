@@ -33,33 +33,36 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 1005;
-const int M = 1000005;
+const int N = 100005;
 
-void add(int, int);
-bool essay(int);
-
-int hed[N], nxt[M], to[M], id;
-int mat[N];
-bool use[N];
-int ans;
+pii que[N];
+int hed, til;
 
 int main () {
-  int n, m, e;
-  read(n), read(m), read(e);
-  for (int i = 1; i <= e; ++i) {
-    int u, v;
-    read(u), read(v);
-    if (u > n || v > m) {
-      continue;
+  int n, m;
+  read(n), read(m);
+  hed = 1, til = 0;
+  for (int i = 1; i <= m; ++i) {
+    int a;
+    read(a);
+    while (hed <= til && que[til].first >= a) {
+      --til;
     }
-    add(u, v);
+    que[++til] = pii(a, i);
   }
-  for (int i = 1; i <= n; ++i) {
-    memset(use, false, sizeof(use));
-    ans += essay(i);
+  write(que[hed].first), EL;
+  for (int i = m + 1; i <= n; ++i) {
+    int a;
+    read(a);
+    while (hed <= til && que[hed].second <= i - m) {
+      ++hed;
+    }
+    while (hed <= til && que[til].first >= a) {
+      --til;
+    }
+    que[++til] = pii(a, i);
+    write(que[hed].first), EL;
   }
-  write(ans), EL;
   return 0;
 }
 
@@ -93,23 +96,4 @@ inline void write(const T &Wr) {
       putchar((Wr % 10) + '0');
     }
   }
-}
-
-void add(int u, int v) {
-  nxt[++id] = hed[u];
-  hed[u] = id;
-  to[id] = v;
-}
-bool essay(int u) {
-  for (int i = hed[u]; i; i = nxt[i]) {
-    int v = to[i];
-    if (!use[v]) {
-      use[v] = true;
-      if (!mat[v] || essay(mat[v])) {
-        mat[v] = u;
-        return true;
-      }
-    }
-  }
-  return false;
 }

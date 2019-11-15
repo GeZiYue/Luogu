@@ -33,33 +33,56 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 1005;
-const int M = 1000005;
+const int N = 105;
+const int M = 10005;
 
 void add(int, int);
-bool essay(int);
+void tarjan(int);
 
+int n;
 int hed[N], nxt[M], to[M], id;
-int mat[N];
-bool use[N];
-int ans;
+
+int col[N], ccnt;
+bool ins[N];
+std::stack<int> sta;
+int dfn[N], low[N], cnt;
+
+int indeg[N], outdeg[N];
 
 int main () {
-  int n, m, e;
-  read(n), read(m), read(e);
-  for (int i = 1; i <= e; ++i) {
-    int u, v;
-    read(u), read(v);
-    if (u > n || v > m) {
-      continue;
+  read(n);
+  for (int u = 1; u <= n; ++u) {
+    int v;
+    read(v);
+    while (v) {
+      add(u, v);
+      read(v);
     }
-    add(u, v);
   }
   for (int i = 1; i <= n; ++i) {
-    memset(use, false, sizeof(use));
-    ans += essay(i);
+    if (!dfn[i]) {
+      tarjan(i);
+    }
   }
-  write(ans), EL;
+  for (int u = 1; u <= n; ++u) {
+    for (int i = hed[u]; i; i = nxt[i]) {
+      int v = to[i];
+      if (col[u] ^ col[v]) {
+        ++outdeg[col[u]];
+        ++indeg[col[v]];
+      }
+    }
+  }
+  if (ccnt == 1) {
+    write(1), EL, write(0), EL;
+    return 0;
+  }
+  int in = 0, out = 0;
+  for (int i = 1; i <= ccnt; ++i) {
+    in += indeg[i] == 0;
+    out += outdeg[i] == 0;
+  }
+  write(in), EL, write(max(in, out)), EL;
   return 0;
 }
 
@@ -100,16 +123,29 @@ void add(int u, int v) {
   hed[u] = id;
   to[id] = v;
 }
-bool essay(int u) {
+void tarjan(int u) {
+  dfn[u] = low[u] = ++cnt;
+  ins[u] = true;
+  sta.push(u);
   for (int i = hed[u]; i; i = nxt[i]) {
     int v = to[i];
-    if (!use[v]) {
-      use[v] = true;
-      if (!mat[v] || essay(mat[v])) {
-        mat[v] = u;
-        return true;
+    if (!dfn[v]) {
+      tarjan(v);
+      low[u] = min(low[u], low[v]);
+    } else {
+      if (ins[v]) {
+        low[u] = min(low[u], dfn[v]);
       }
     }
   }
-  return false;
+  if (low[u] == dfn[u]) {
+    int i;
+    ++ccnt;
+    do {
+      i = sta.top();
+      sta.pop();
+      ins[i] = false;
+      col[i] = ccnt;
+    } while (i != u);
+  }
 }

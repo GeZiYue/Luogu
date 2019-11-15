@@ -33,31 +33,19 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 1005;
-const int M = 1000005;
 
-void add(int, int);
-bool essay(int);
-
-int hed[N], nxt[M], to[M], id;
-int mat[N];
-bool use[N];
-int ans;
+int n, k;
+ll ans;
 
 int main () {
-  int n, m, e;
-  read(n), read(m), read(e);
-  for (int i = 1; i <= e; ++i) {
-    int u, v;
-    read(u), read(v);
-    if (u > n || v > m) {
-      continue;
+  read(k), read(n);
+  ll now = 1;
+  while (n) {
+    if (n & 1) {
+      ans += now;
     }
-    add(u, v);
-  }
-  for (int i = 1; i <= n; ++i) {
-    memset(use, false, sizeof(use));
-    ans += essay(i);
+    now *= k;
+    n >>= 1;
   }
   write(ans), EL;
   return 0;
@@ -93,23 +81,4 @@ inline void write(const T &Wr) {
       putchar((Wr % 10) + '0');
     }
   }
-}
-
-void add(int u, int v) {
-  nxt[++id] = hed[u];
-  hed[u] = id;
-  to[id] = v;
-}
-bool essay(int u) {
-  for (int i = hed[u]; i; i = nxt[i]) {
-    int v = to[i];
-    if (!use[v]) {
-      use[v] = true;
-      if (!mat[v] || essay(mat[v])) {
-        mat[v] = u;
-        return true;
-      }
-    }
-  }
-  return false;
 }

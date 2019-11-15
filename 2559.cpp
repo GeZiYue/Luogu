@@ -33,33 +33,34 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 1005;
-const int M = 1000005;
+const int N = 105;
+const int M = 20005;
 
-void add(int, int);
-bool essay(int);
+void add(int, int, int);
+void Dijkstra(int);
 
-int hed[N], nxt[M], to[M], id;
-int mat[N];
-bool use[N];
-int ans;
+int hed[N], nxt[M], to[M], dis[M], id;
+int h[10] = {0, 2, 6, 4, 8, 6, 10, 14};
+int delta[N];
 
 int main () {
-  int n, m, e;
-  read(n), read(m), read(e);
-  for (int i = 1; i <= e; ++i) {
-    int u, v;
-    read(u), read(v);
-    if (u > n || v > m) {
-      continue;
-    }
-    add(u, v);
+  for (int i = 1; i <= 7; ++i) {
+    int a;
+    read(a);
+    h[i] /= (a + 1);
   }
-  for (int i = 1; i <= n; ++i) {
-    memset(use, false, sizeof(use));
-    ans += essay(i);
+  int s, t;
+  read(s), read(t);
+  int m;
+  read(m);
+  for (int i = 1; i <= m; ++i) {
+    int u, v, ty;
+    read(u), read(v), read(ty);
+    add(u, v, h[ty]);
+    add(v, u, h[ty]);
   }
-  write(ans), EL;
+  Dijkstra(s);
+  write(delta[t]), EL;
   return 0;
 }
 
@@ -95,21 +96,32 @@ inline void write(const T &Wr) {
   }
 }
 
-void add(int u, int v) {
+void add(int u, int v, int w) {
   nxt[++id] = hed[u];
   hed[u] = id;
   to[id] = v;
+  dis[id] = w;
 }
-bool essay(int u) {
-  for (int i = hed[u]; i; i = nxt[i]) {
-    int v = to[i];
-    if (!use[v]) {
-      use[v] = true;
-      if (!mat[v] || essay(mat[v])) {
-        mat[v] = u;
-        return true;
+void Dijkstra(int s) {
+  for (int i = 1; i <= 100; ++i) {
+    delta[i] = iinf;
+  }
+  delta[s] = 0;
+  std::priority_queue<pii, std::vector<pii>, std::greater<pii> > pq;
+  pq.push(pii(0, s));
+  while (!pq.empty()) {
+    int u = pq.top().second;
+    int d = pq.top().first;
+    pq.pop();
+    if (delta[u] != d) {
+      continue;
+    }
+    for (int i = hed[u]; i; i = nxt[i]) {
+      int v = to[i];
+      if (d + dis[i] < delta[v]) {
+        delta[v] = d + dis[i];
+        pq.push(pii(delta[v], v));
       }
     }
   }
-  return false;
 }
