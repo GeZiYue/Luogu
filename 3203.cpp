@@ -24,6 +24,7 @@ template<class T>
 void write(const T&);
 
 typedef long long ll;
+typedef unsigned long long ull;
 typedef const long long & cll;
 typedef const int & ci;
 typedef std::pair<int, int> pii;
@@ -33,53 +34,53 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 100005;
-const int M = 300005;
+const int N = 200005;
 
 class Node {
 public:
   int fa, ch[2];
-  int val;
-  int sum;
+  int siz;
   bool rev;
 };
 Node tre[N];
 #define fa(x) (tre[x].fa)
 #define lc(x) (tre[x].ch[0])
 #define rc(x) (tre[x].ch[1])
-#define val(x) (tre[x].val)
-#define sum(x) (tre[x].sum)
+#define siz(x) (tre[x].siz)
 #define rev(x) (tre[x].rev)
+int sta[N];
 
-void pushup(int);
-void splay(int);
+void access(int);
+int findroot(int);
+void makeroot(int);
 void split(int, int);
 void link(int, int);
 void cut(int, int);
+int get_next(int, int);
 
-int sta[N];
 int n, m;
+int k[N];
 
 int main () {
-  read(n), read(m);
+  read(n);
   for (int i = 1; i <= n; ++i) {
-    read(val(i));
+    read(k[i]);
+    link(i, get_next(i, k[i]));
   }
+  read(m);
   for (int i = 1; i <= m; ++i) {
-    int op, x, y;
-    read(op), read(x), read(y);
+    int op, x;
+    read(op), read(x);
+    ++x;
     switch (op) {
-    case 0:
-      split(x, y), write(sum(y)), EL;
-      break;
     case 1:
-      link(x, y);
+      split(x, n + 1);
+      write(siz(n + 1) - 1), EL;
       break;
     case 2:
-      cut(x, y);
-      break;
-    case 3:
-      splay(x), val(x) = y;
+      cut(x, get_next(x, k[x]));
+      read(k[x]);
+      link(x, get_next(x, k[x]));
       break;
     }
   }
@@ -119,8 +120,11 @@ inline void write(const T &Wr) {
 }
 
 inline void reverse(int x) {
-  std::swap(lc(x), rc(x));
+  lc(x) ^= rc(x) ^= lc(x) ^= rc(x);
   rev(x) ^= 1;
+}
+inline void pushup(int x) {
+  siz(x) = siz(lc(x)) + siz(rc(x)) + 1;
 }
 inline void pushdown(int x) {
   if (rev(x)) {
@@ -128,9 +132,6 @@ inline void pushdown(int x) {
     reverse(rc(x));
     rev(x) = false;
   }
-}
-inline void pushup(int x) {
-  sum(x) = sum(lc(x)) ^ sum(rc(x)) ^ val(x);
 }
 inline bool nroot(int x) {
   return lc(fa(x)) == x || rc(fa(x)) == x;
@@ -171,43 +172,37 @@ inline void splay(int x) {
   pushup(x);
 }
 inline void access(int x) {
-  for (int i = 0; x; x = fa(i = x)) {
-    splay(x);
-    rc(x) = i;
-    pushup(x);
+  for (int y = 0; x; x = fa(y = x)) {
+    splay(x), rc(x) = y, pushup(x);
   }
 }
 inline int findroot(int x) {
-  access(x);
-  splay(x);
+  access(x), splay(x);
   while (true) {
     pushdown(x);
     if (lc(x)) {
       x = lc(x);
     } else {
-      break;
+      splay(x);
+      return x;
     }
   }
-  splay(x);
-  return x;
 }
 inline void makeroot(int x) {
   access(x), splay(x), reverse(x);
 }
-inline void split(int u, int v) {
-  makeroot(u), access(v), splay(v);
+inline void split(int x, int y) {
+  makeroot(x), access(y), splay(y);
 }
-inline void link(int u, int v) {
-  makeroot(u);
-  if (findroot(v) != u) {
-    fa(u) = v;
-  }
+inline void link(int x, int y) {
+  split(x, y);
+  fa(x) = y;
 }
-inline void cut(int u, int v) {
-  makeroot(u);
-  if (findroot(v) == u && fa(v) == u && !lc(v)) {
-    splay(v);
-    fa(u) = lc(v) = 0;
-    pushup(v);
-  }
+inline void cut(int x, int y) {
+  split(x, y);
+  fa(x) = lc(y) = 0;
+  pushup(y);
+}
+inline int get_next(int x, int k) {
+  return min(n + 1, x + k);
 }
