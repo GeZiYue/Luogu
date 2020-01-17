@@ -24,6 +24,7 @@ template<class T>
 void write(const T&);
 
 typedef long long ll;
+typedef unsigned long long ull;
 typedef const long long & cll;
 typedef const int & ci;
 typedef std::pair<int, int> pii;
@@ -33,26 +34,67 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 10005;
-const int M = 200005;
+const int N = 105;
+const int M = 5205;
 
 void add(int, int, int);
+bool dinic_bfs();
+int dinic_dfs(int, int);
 int dinic();
 
 int hed[N], cur[N], nxt[M], to[M], flw[M], id = 1;
-int que[N], qh, qt;
 int dep[N];
-int n, m, S, T;
+int que[N], qh, qt;
+int Pt, S, T;
+int ans;
+int edg[55];
+int n, m;
 
 int main () {
-  read(n), read(m), read(S), read(T);
-  for (int i = 1; i <= m; ++i) {
-    int u, v, f;
-    read(u), read(v), read(f);
-    add(u, v, f);
-    add(v, u, 0);
+  std::string str;
+  std::getline(std::cin, str);
+  std::stringstream s;
+  s << str;
+  s >> n >> m;
+  Pt = T = n + m + 2, S = n + m + 1;
+  for (int i = 1; i <= n; ++i) {
+    std::string str;
+    std::getline(std::cin, str);
+    std::stringstream s;
+    s << str;
+    int a;
+    s >> a;
+    ans += a;
+    add(S, i, a);
+    edg[i] = id;
+    add(i, S, 0);
+    int v;
+    while (s >> v) {
+      add(i, v + n, iinf);
+      add(v + n, i, 0);
+    }
   }
-  write(dinic()), EL;
+  for (int i = 1; i <= m; ++i) {
+    int a;
+    read(a);
+    add(i + n, T, a);
+    add(T, i + n, 0);
+  }
+  ans -= dinic();
+  dinic_bfs();
+  for (int i = 1; i <= n; ++i) {
+    if (~dep[i]) {
+      write(i), SP;
+    }
+  }
+  EL;
+  for (int i = 1; i <= m; ++i) {
+    if (~dep[i + n]) {
+      write(i), SP;
+    }
+  }
+  EL;
+  write(ans), EL;
   return 0;
 }
 
@@ -95,11 +137,12 @@ void add(int u, int v, int f) {
   flw[id] = f;
 }
 bool dinic_bfs() {
-  for (int i = 1; i <= n; ++i) {
+  for (int i = 1; i <= Pt; ++i) {
     dep[i] = -1;
     cur[i] = hed[i];
   }
-  dep[que[qh = qt = 1] = S] = 0;
+  que[qh = qt = 1] = S;
+  dep[S] = 0;
   while (qh <= qt) {
     int u = que[qh++];
     for (int i = hed[u]; i; i = nxt[i]) {
@@ -113,7 +156,7 @@ bool dinic_bfs() {
   return ~dep[T];
 }
 int dinic_dfs(int u, int f) {
-  if (u == T || f == 0) {
+  if (u == T || !f) {
     return f;
   }
   int ans = 0;
@@ -124,8 +167,8 @@ int dinic_dfs(int u, int f) {
       int now = dinic_dfs(v, min(f, flw[i]));
       flw[i] -= now;
       flw[i ^ 1] += now;
-      ans += now;
       f -= now;
+      ans += now;
       if (!f) {
         break;
       }
