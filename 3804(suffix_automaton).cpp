@@ -17,12 +17,10 @@
 #define SP putchar(' ')
 #define EL putchar('\n')
 #define File(a) freopen(a ".in", "r", stdin), freopen(a ".out", "w", stdout)
-
 template<class T>
 void read(T&);
 template<class T>
 void write(const T&);
-
 typedef long long ll;
 typedef unsigned long long ull;
 typedef const long long & cll;
@@ -34,33 +32,40 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 1000005;
-const int inf = 100000000;
 
-class Suffix_tree {
+const int N = 1000002;
+
+class Suffix_Automaton {
 public:
-  int s[N];
-  int to[N << 1][27], lnk[N << 1], sta[N << 1], len[N << 1], tot;
-  int cnt[N << 1];
-  int n, now, rem;
-  Suffix_tree() : n(0), tot(1), now(1), rem(0) {len[0] = iinf;}
-  int newnode(int, int);
+  class Node {
+  public:
+    int len, lnk;
+    int to[26];
+  };
+  Node tre[N << 1];
+  int hed[N << 1], nxt[N << 1], to[N << 1], id;
+  int sum[N << 1];
+  int siz, las;
+  Suffix_Automaton() { tre[0].lnk = -1; }
   void extend(int);
-  void query(int, int);
-} st;
+  void add(int, int);
+  void build();
+  void calc(int);
+};
 
-int n;
+Suffix_Automaton SAM;
 char ch[N];
 ll ans;
+int n;
 
 int main () {
   scanf("%s", ch + 1);
   n = strlen(ch + 1);
   for (int i = 1; i <= n; ++i) {
-    st.extend(ch[i] - 'a');
+    SAM.extend(ch[i] - 'a');
   }
-  st.extend(26);
-  st.query(1, 0);
+  SAM.build();
+  SAM.calc(0);
   write(ans), EL;
   return 0;
 }
@@ -97,54 +102,52 @@ inline void write(const T &Wr) {
   }
 }
 
-int Suffix_tree::newnode(int st, int ln) {
-  lnk[++tot] = 1;
-  sta[tot] = st;
-  len[tot] = ln;
-  return tot;
-}
-void Suffix_tree::extend(int x) {
-  s[++n] = x, ++rem;
-  for (int las = 1; rem; ) {
-    while (rem > len[to[now][s[n - rem + 1]]]) {
-      rem -= len[now = to[now][s[n - rem + 1]]];
-    }
-    int &v = to[now][s[n - rem + 1]], c = s[sta[v] + rem - 1];
-    if (!v || x == c) {
-      lnk[las] = now;
-      las = now;
-      if (!v) {
-        v = newnode(n - rem + 1, inf);
-      } else {
-        break;
+void Suffix_Automaton::extend(int c) {
+  int cur = ++siz;
+  tre[cur].len = tre[las].len + 1;
+  sum[cur] = 1;
+  int p = las;
+  while (~p && !tre[p].to[c]) {
+    tre[p].to[c] = cur;
+    p = tre[p].lnk;
+  }
+  if (p == -1) {
+    tre[cur].lnk = 0;
+  } else {
+    int q = tre[p].to[c];
+    if (tre[p].len + 1 == tre[q].len) {
+      tre[cur].lnk = q;
+    } else {
+      ++siz;
+      tre[siz].len = tre[p].len + 1;
+      tre[siz].lnk = tre[q].lnk;
+      memcpy(tre[siz].to, tre[q].to, sizeof(int) * 26);
+      while (~p && tre[p].to[c] == q) {
+        tre[p].to[c] = siz;
+        p = tre[p].lnk;
       }
-    } else {
-      int u = newnode(sta[v], rem - 1);
-      to[u][c] = v, to[u][x] = newnode(n, inf);
-      sta[v] += rem - 1;
-      len[v] -= rem - 1;
-      lnk[las] = v = u;
-      las = u;
+      tre[q].lnk = tre[cur].lnk = siz;
     }
-    if (now == 1) {
-      --rem;
-    } else {
-      now = lnk[now];
-    }
+  }
+  las = cur;
+}
+void Suffix_Automaton::add(int u, int v) {
+  nxt[++id] = hed[u];
+  hed[u] = id;
+  to[id] = v;
+}
+void Suffix_Automaton::build() {
+  for (int i = 1; i <= siz; ++i) {
+    add(tre[i].lnk, i);
   }
 }
-void Suffix_tree::query(int x, int ln) {
-  if (ln >= inf) {
-    ++cnt[x];
-    return;
+void Suffix_Automaton::calc(int u) {
+  for (int i = hed[u]; i; i = nxt[i]) {
+    int v = to[i];
+    calc(v);
+    sum[u] += sum[v];
   }
-  for (int i = 0; i <= 26; ++i) {
-    if (to[x][i]) {
-      query(to[x][i], ln + len[to[x][i]]);
-      cnt[x] += cnt[to[x][i]];
-    }
-  }
-  if (cnt[x] > 1) {
-    ans = max(ans, ln * 1ll * cnt[x]);
+  if (sum[u] != 1) {
+    ans = max(ans, tre[u].len * 1ll * sum[u]);
   }
 }
