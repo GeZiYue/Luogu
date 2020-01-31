@@ -24,6 +24,7 @@ template<class T>
 void write(const T&);
 
 typedef long long ll;
+typedef unsigned long long ull;
 typedef const long long & cll;
 typedef const int & ci;
 typedef std::pair<int, int> pii;
@@ -33,37 +34,52 @@ using std::min;
 using std::max;
 using std::abs;
 using std::sort;
-const int N = 280000;
-const int Mod = 998244353, g = 3, gi = 332748118;
+
+const int N = 270000;
+const int Mod = 998244353, g = 3, ig = 332748118;
 
 class Poly {
 public:
   int *a;
   int deg;
   Poly() { a = new int[N]; memset(a, 0, sizeof(int) * (N - 1)); }
-  void NTT(int, bool) const;
-  Poly inv() const;
-  Poly drv() const;
-  Poly itg() const;
-  Poly ln() const;
-  Poly exp() const;
+  void NTT(int, bool);
+  Poly inv();
+  Poly drv();
+  Poly itg();
+  Poly ln();
+  Poly exp();
+  Poly pow(int);
 };
-int pow(int, int, int);
-int add(int a, int b) { a += b; if (a >= Mod) {a -= Mod;} return a; }
-int sub(int a, int b) { a -= b; if (a < 0) {a += Mod;} return a; }
+int add(int a, int b) { a += b; return a >= Mod ? a - Mod : a; }
+int sub(int a, int b) { a -= b; return a < 0 ? a + Mod : a; }
+int qpow(int, int);
 int r[N];
-int n;
+
+Poly A;
+int n, k;
 
 int main () {
   read(n);
-  Poly f;
-  f.deg = --n;
-  for (int i = 0; i <= n; ++i) {
-    read(f.a[i]);
+  --n;
+  {
+    char ch = getchar();
+    while (!isNum(ch)) {
+      ch = getchar();
+    }
+    k = 0;
+    while (isNum(ch)) {
+      k = (k * 10ll + ch - '0') % Mod;
+      ch = getchar();
+    }
   }
-  Poly g = f.exp();
   for (int i = 0; i <= n; ++i) {
-    write(g.a[i]), SP;
+    read(A.a[i]);
+  }
+  A.deg = n;
+  A = A.pow(k);
+  for (int i = 0; i <= n; ++i) {
+    write(A.a[i]), SP;
   }
   EL;
   return 0;
@@ -101,46 +117,46 @@ inline void write(const T &Wr) {
   }
 }
 
-int pow(int a, int b, int p) {
-  int ans = 1, now = a;
+int qpow(int a, int b) {
+  int now = a, ans = 1;
   while (b) {
     if (b & 1) {
-      ans = ans * 1ll * now % p;
+      ans = ans * 1ll * now % Mod;
     }
-    now = now * 1ll * now % p;
+    now = now * 1ll * now % Mod;
     b >>= 1;
   }
   return ans;
 }
-void Poly::NTT(int lim, bool opt) const {
+void Poly::NTT(int lim, bool opt) {
   for (int i = 0; i < lim; ++i) {
     if (i < r[i]) {
       std::swap(a[i], a[r[i]]);
     }
   }
   for (int l = 1; l < lim; l <<= 1) {
-    int gn = pow(opt ? gi : g, (Mod - 1) / (l << 1), Mod);
+    int gw = qpow(opt ? ig : g, (Mod - 1) / (l << 1));
     for (int i = 0; i < lim; i += (l << 1)) {
-      for (int j = 0, gw = 1; j < l; ++j, gw = gw * 1ll * gn % Mod) {
-        int x = a[i + j], y = a[i + j + l] * 1ll * gw % Mod;
+      for (int j = 0, gn = 1; j < l; ++j, gn = gn * 1ll * gw % Mod) {
+        int x = a[i + j], y = a[i + j + l] * 1ll * gn % Mod;
         a[i + j] = add(x, y);
         a[i + j + l] = sub(x, y);
       }
     }
   }
   if (opt) {
-    int iv = pow(lim, Mod - 2, Mod);
+    int iv = qpow(lim, Mod - 2);
     for (int i = 0; i < lim; ++i) {
       a[i] = a[i] * 1ll * iv % Mod;
     }
   }
 }
-Poly Poly::inv() const {
-  Poly A, B;
+Poly Poly::inv() {
+  Poly A, B, ans;
   int now = 1;
-  Poly ans;
-  ans.a[0] = pow(this->a[0], Mod - 2, Mod);
-  while ((now >> 1) <= this->deg) {
+  ans.a[0] = qpow(this->a[0], Mod - 2);
+  ans.deg = this->deg;
+  while ((now >> 1) <= deg) {
     for (int i = 0; i < now; ++i) {
       A.a[i] = this->a[i];
       B.a[i] = ans.a[i];
@@ -151,7 +167,7 @@ Poly Poly::inv() const {
     }
     A.NTT(lim, false), B.NTT(lim, false);
     for (int i = 0; i < lim; ++i) {
-      ans.a[i] = B.a[i] * 1ll * sub(2, int(A.a[i] * 1ll * B.a[i] % Mod)) % Mod;
+      ans.a[i] = B.a[i] * 1ll * sub(2, int(B.a[i] * 1ll * A.a[i] % Mod)) % Mod;
     }
     ans.NTT(lim, true);
     for (int i = now; i < lim; ++i) {
@@ -159,13 +175,12 @@ Poly Poly::inv() const {
     }
     now <<= 1;
   }
-  ans.deg = this->deg;
   for (int i = ans.deg + 1; i < (now >> 1); ++i) {
     ans.a[i] = 0;
   }
   return ans;
 }
-Poly Poly::drv() const {
+Poly Poly::drv() {
   Poly ans;
   ans.deg = this->deg - 1;
   for (int i = 0; i <= ans.deg; ++i) {
@@ -173,16 +188,16 @@ Poly Poly::drv() const {
   }
   return ans;
 }
-Poly Poly::itg() const {
+Poly Poly::itg() {
   Poly ans;
   ans.deg = this->deg + 1;
   for (int i = 1; i <= ans.deg; ++i) {
-    ans.a[i] = this->a[i - 1] * 1ll * pow(i, Mod - 2, Mod) % Mod;
+    ans.a[i] = this->a[i - 1] * 1ll * qpow(i, Mod - 2) % Mod;
   }
   return ans;
 }
-Poly Poly::ln() const {
-  Poly A = this->drv(), B = this->inv();
+Poly Poly::ln() {
+  Poly A = this->inv(), B = this->drv();
   int lim = 1;
   while (lim <= (this->deg << 1)) {
     lim <<= 1;
@@ -196,16 +211,15 @@ Poly Poly::ln() const {
   }
   A.NTT(lim, true);
   A.deg = this->deg - 1;
-  for (int i = A.deg + 1; i < lim; ++i) {
+  for (int i = this->deg; i < lim; ++i) {
     A.a[i] = 0;
   }
   return A.itg();
 }
-Poly Poly::exp() const {
-  Poly A, B, L;
-  Poly ans;
-  ans.a[0] = 1;
+Poly Poly::exp() {
+  Poly A, B, L, ans;
   int now = 1;
+  ans.a[0] = 1, ans.deg = this->deg;
   while ((now >> 1) <= this->deg) {
     for (int i = 0; i < now; ++i) {
       A.a[i] = this->a[i];
@@ -227,9 +241,15 @@ Poly Poly::exp() const {
     }
     now <<= 1;
   }
-  ans.deg = this->deg;
   for (int i = ans.deg + 1; i < (now >> 1); ++i) {
     ans.a[i] = 0;
   }
   return ans;
+}
+Poly Poly::pow(int k) {
+  Poly ans = this->ln();
+  for (int i = 0; i <= ans.deg; ++i) {
+    ans.a[i] = ans.a[i] * 1ll * k % Mod;
+  }
+  return ans.exp();
 }
