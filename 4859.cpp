@@ -36,50 +36,60 @@ using std::max;
 using std::abs;
 using std::sort;
 
-const int N = 105;
-const double eps = 1e-6;
+const int N = 2005;
+const int Mod = 1000000009;
 
-double a[N][N];
-int n;
+int pow(int, int, int);
+
+int fac[N], ifac[N];
+int dp[N][N];
+int a[N], b[N];
+int r[N];
 
 int main () {
-  read(n);
-  for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= n + 1; ++j) {
-      scanf("%lf", &a[i][j]);
-    }
+  int n, k;
+  read(n), read(k);
+  if ((n + k) & 1) {
+    puts("0");
+    return 0;
+  } else {
+    k = (n + k) >> 1;
   }
+  fac[0] = 1;
   for (int i = 1; i <= n; ++i) {
-    int md = i;
-    for (int j = i + 1; j <= n; ++j) {
-      if (abs(a[j][i]) > abs(a[md][i])) {
-        md = j;
-      }
-    }
-    if (abs(a[md][i]) < eps) {
-      puts("No Solution");
-      return 0;
-    }
-    if (i != md) {
-      std::swap(a[i], a[md]);
-    }
-    for (int j = n + 1; j >= i; --j) {
-      a[i][j] /= a[i][i];
-    }
-    for (int j = i + 1; j <= n; ++j) {
-      for (int k = n + 1; k >= i; --k) {
-        a[j][k] -= a[j][i] * a[i][k];
-      }
-    }
+    fac[i] = fac[i - 1] * 1ll * i % Mod;
   }
-  for (int i = n - 1; i >= 1; --i) {
-    for (int j = i + 1; j <= n; ++j) {
-      a[i][n + 1] -= a[i][j] * a[j][n + 1];
-    }
+  ifac[n] = pow(fac[n], Mod - 2, Mod);
+  for (int i = n - 1; i >= 0; --i) {
+    ifac[i] = ifac[i + 1] * 1ll * (i + 1) % Mod;
   }
   for (int i = 1; i <= n; ++i) {
-    printf("%.2lf\n", a[i][n + 1]);
+    read(a[i]);
   }
+  for (int i = 1; i <= n; ++i) {
+    read(b[i]);
+  }
+  sort(a + 1, a + n + 1);
+  sort(b + 1, b + n + 1);
+  b[n + 1] = iinf;
+  for (int i = 1; i <= n; ++i) {
+    r[i] = r[i - 1];
+    while (a[i] > b[r[i] + 1]) {
+      ++r[i];
+    }
+  }
+  dp[0][0] = 1;
+  for (int i = 1; i <= n; ++i) {
+    dp[i][0] = dp[i - 1][0];
+    for (int j = 1; j <= i; ++j) {
+      dp[i][j] = (dp[i - 1][j] + (r[i] - j + 1) * 1ll * dp[i - 1][j - 1] % Mod) % Mod;
+    }
+  }
+  int ans = 0;
+  for (int i = k; i <= n; ++i) {
+    ans = (ans + (((i - k) & 1) ? (Mod - 1) : 1) * 1ll * fac[i] % Mod * ifac[k] % Mod * ifac[i - k] % Mod * dp[n][i] % Mod * fac[n - i] % Mod) % Mod;
+  }
+  write(ans), EL;
   return 0;
 }
 
@@ -113,4 +123,16 @@ inline void write(const T &Wr) {
       putchar((Wr % 10) + '0');
     }
   }
+}
+
+int pow(int a, int b, int m) {
+  int ans = 1, now = a;
+  while (b) {
+    if (b & 1) {
+      ans = ans * 1ll * now % m;
+    }
+    now = now * 1ll * now % m;
+    b >>= 1;
+  }
+  return ans;
 }

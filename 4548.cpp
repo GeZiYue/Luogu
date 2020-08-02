@@ -10,7 +10,6 @@
 #include <cmath>
 #include <queue>
 #include <stack>
-#include <ctime>
 #include <set>
 #include <map>
 
@@ -36,49 +35,42 @@ using std::max;
 using std::abs;
 using std::sort;
 
-const int N = 105;
-const double eps = 1e-6;
+const int N = 100005;
+const int Mod = 10000;
 
-double a[N][N];
-int n;
+int a[N];
+int nxt[N];
+int power[N];
 
 int main () {
-  read(n);
-  for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= n + 1; ++j) {
-      scanf("%lf", &a[i][j]);
-    }
+  int n, t;
+  read(n), read(t);
+  power[0] = 1;
+  for (int i = 1; i <= 100000; ++i) {
+    power[i] = power[i - 1] * n % Mod;
   }
-  for (int i = 1; i <= n; ++i) {
-    int md = i;
-    for (int j = i + 1; j <= n; ++j) {
-      if (abs(a[j][i]) > abs(a[md][i])) {
-        md = j;
+  for (int i = 1; i <= t; ++i) {
+    int m;
+    read(m);
+    for (int j = 1; j <= m; ++j) {
+      read(a[j]);
+    }
+    for (int j = 2, k = 0; j <= m; ++j) {
+      while (k && a[k + 1] != a[j]) {
+        k = nxt[k];
       }
+      k += (a[k + 1] == a[j]);
+      nxt[j] = k;
     }
-    if (abs(a[md][i]) < eps) {
-      puts("No Solution");
-      return 0;
+    int tmp = m;
+    int ans = 0;
+    while (tmp) {
+      ans = (ans + power[tmp]) % Mod;
+      tmp = nxt[tmp];
     }
-    if (i != md) {
-      std::swap(a[i], a[md]);
-    }
-    for (int j = n + 1; j >= i; --j) {
-      a[i][j] /= a[i][i];
-    }
-    for (int j = i + 1; j <= n; ++j) {
-      for (int k = n + 1; k >= i; --k) {
-        a[j][k] -= a[j][i] * a[i][k];
-      }
-    }
-  }
-  for (int i = n - 1; i >= 1; --i) {
-    for (int j = i + 1; j <= n; ++j) {
-      a[i][n + 1] -= a[i][j] * a[j][n + 1];
-    }
-  }
-  for (int i = 1; i <= n; ++i) {
-    printf("%.2lf\n", a[i][n + 1]);
+    std::cout.width(4);
+    std::cout.fill('0');
+    std::cout << ans << std::endl;
   }
   return 0;
 }

@@ -36,50 +36,54 @@ using std::max;
 using std::abs;
 using std::sort;
 
-const int N = 105;
-const double eps = 1e-6;
+const int N = (1 << 20);
+const int Mod = 1000000009;
 
-double a[N][N];
-int n;
+int count[N];
+int a[21][N], b[21][N], c[21][N];
 
 int main () {
+  int n;
   read(n);
-  for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= n + 1; ++j) {
-      scanf("%lf", &a[i][j]);
-    }
+  for (int i = 1; i < (1 << n); ++i) {
+    count[i] = count[i >> 1] + (i & 1);
   }
-  for (int i = 1; i <= n; ++i) {
-    int md = i;
-    for (int j = i + 1; j <= n; ++j) {
-      if (abs(a[j][i]) > abs(a[md][i])) {
-        md = j;
-      }
-    }
-    if (abs(a[md][i]) < eps) {
-      puts("No Solution");
-      return 0;
-    }
-    if (i != md) {
-      std::swap(a[i], a[md]);
-    }
-    for (int j = n + 1; j >= i; --j) {
-      a[i][j] /= a[i][i];
-    }
-    for (int j = i + 1; j <= n; ++j) {
-      for (int k = n + 1; k >= i; --k) {
-        a[j][k] -= a[j][i] * a[i][k];
+  for (int i = 0; i < (1 << n); ++i) {
+    read(a[count[i]][i]);
+  }
+  for (int i = 0; i < (1 << n); ++i) {
+    read(b[count[i]][i]);
+  }
+  for (int i = 0; i <= n; ++i) {
+    for (int j = 0; j < n; ++j) {
+      for (int k = 0; k < (1 << n); ++k) {
+        if (k & (1 << j)) {
+          a[i][k] = (a[i][k] + a[i][k ^ (1 << j)]) % Mod;
+          b[i][k] = (b[i][k] + b[i][k ^ (1 << j)]) % Mod;
+        }
       }
     }
   }
-  for (int i = n - 1; i >= 1; --i) {
-    for (int j = i + 1; j <= n; ++j) {
-      a[i][n + 1] -= a[i][j] * a[j][n + 1];
+  for (int i = 0; i <= n; ++i) {
+    for (int j = 0; j <= i; ++j) {
+      for (int k = 0; k < (1 << n); ++k) {
+        c[i][k] = (c[i][k] + a[j][k] * 1ll * b[i - j][k] % Mod) % Mod;
+      }
     }
   }
-  for (int i = 1; i <= n; ++i) {
-    printf("%.2lf\n", a[i][n + 1]);
+  for (int i = 0; i <= n; ++i) {
+    for (int j = 0; j < n; ++j) {
+      for (int k = 0; k < (1 << n); ++k) {
+        if (k & (1 << j)) {
+          c[i][k] = (c[i][k] + Mod - c[i][k ^ (1 << j)]) % Mod;
+        }
+      }
+    }
   }
+  for (int i = 0; i < (1 << n); ++i) {
+    write(c[count[i]][i]), SP;
+  }
+  EL;
   return 0;
 }
 

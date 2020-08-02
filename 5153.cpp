@@ -10,7 +10,6 @@
 #include <cmath>
 #include <queue>
 #include <stack>
-#include <ctime>
 #include <set>
 #include <map>
 
@@ -36,50 +35,46 @@ using std::max;
 using std::abs;
 using std::sort;
 
-const int N = 105;
-const double eps = 1e-6;
+const int N = 50;
+const int Mod = 1000000007;
 
-double a[N][N];
-int n;
+ll gcd(ll a, ll b);
+int pow(int a, int b, int m);
+
+ll f[N], l[N];
+int cnt[10];
+ll n;
 
 int main () {
+  l[1] = 1;
+  f[2] = 1;
+  for (int i = 2; i <= 42; ++i) {
+    l[i] = l[i - 1] * (i / gcd(i, l[i - 1]));
+  }
+  for (int i = 3; i <= 43; ++i) {
+    for (int j = 2; j < i; ++j) {
+      if (i % j) {
+        f[i] = f[j] + 1;
+        break;
+      }
+    }
+  }
   read(n);
-  for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= n + 1; ++j) {
-      scanf("%lf", &a[i][j]);
-    }
+  l[43] = n + 1;
+  cnt[2] = ((n / l[1]) - 1 - (n / l[2])) % (Mod - 1);
+  for (int i = 2; i <= 42; ++i) {
+    cnt[f[i + 1] + 1] = (cnt[f[i + 1] + 1] + ((n / l[i]) - (n / l[i + 1])) % (Mod - 1)) % (Mod - 1);
   }
-  for (int i = 1; i <= n; ++i) {
-    int md = i;
-    for (int j = i + 1; j <= n; ++j) {
-      if (abs(a[j][i]) > abs(a[md][i])) {
-        md = j;
-      }
-    }
-    if (abs(a[md][i]) < eps) {
-      puts("No Solution");
-      return 0;
-    }
-    if (i != md) {
-      std::swap(a[i], a[md]);
-    }
-    for (int j = n + 1; j >= i; --j) {
-      a[i][j] /= a[i][i];
-    }
-    for (int j = i + 1; j <= n; ++j) {
-      for (int k = n + 1; k >= i; --k) {
-        a[j][k] -= a[j][i] * a[i][k];
-      }
-    }
+  if (cnt[3]) {
+    --cnt[3];
+  } else {
+    cnt[3] = Mod - 2;
   }
-  for (int i = n - 1; i >= 1; --i) {
-    for (int j = i + 1; j <= n; ++j) {
-      a[i][n + 1] -= a[i][j] * a[j][n + 1];
-    }
+  int ans = 1;
+  for (int i = 2; i <= 6; ++i) {
+    ans = ans * 1ll * pow(i, cnt[i], Mod) % Mod;
   }
-  for (int i = 1; i <= n; ++i) {
-    printf("%.2lf\n", a[i][n + 1]);
-  }
+  write(ans), EL;
   return 0;
 }
 
@@ -113,4 +108,19 @@ inline void write(const T &Wr) {
       putchar((Wr % 10) + '0');
     }
   }
+}
+
+ll gcd(ll a, ll b) {
+  return b ? gcd(b, a % b) : a;
+}
+int pow(int a, int b, int m) {
+  int ans = 1, now = a;
+  while (b) {
+    if (b & 1) {
+      ans = ans * 1ll * now % m;
+    }
+    now = now * 1ll * now % m;
+    b >>= 1;
+  }
+  return ans;
 }

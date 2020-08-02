@@ -10,7 +10,6 @@
 #include <cmath>
 #include <queue>
 #include <stack>
-#include <ctime>
 #include <set>
 #include <map>
 
@@ -36,50 +35,32 @@ using std::max;
 using std::abs;
 using std::sort;
 
-const int N = 105;
-const double eps = 1e-6;
+const int N = 20000005;
+typedef unsigned int ui;
 
-double a[N][N];
+ui getnxt();
+
+ui seed;
+ui a[N];
+bool isp[N];
 int n;
 
 int main () {
-  read(n);
+  read(n), read(seed);
   for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= n + 1; ++j) {
-      scanf("%lf", &a[i][j]);
-    }
+    a[i] = getnxt();
   }
-  for (int i = 1; i <= n; ++i) {
-    int md = i;
-    for (int j = i + 1; j <= n; ++j) {
-      if (abs(a[j][i]) > abs(a[md][i])) {
-        md = j;
+  ui ans = a[1];
+  for (int i = 2; i <= n; ++i) {
+    if (!isp[i]) {
+      for (int j = i; j <= n; j += i) {
+        isp[j] = true;
+        a[j] += a[j / i];
       }
     }
-    if (abs(a[md][i]) < eps) {
-      puts("No Solution");
-      return 0;
-    }
-    if (i != md) {
-      std::swap(a[i], a[md]);
-    }
-    for (int j = n + 1; j >= i; --j) {
-      a[i][j] /= a[i][i];
-    }
-    for (int j = i + 1; j <= n; ++j) {
-      for (int k = n + 1; k >= i; --k) {
-        a[j][k] -= a[j][i] * a[i][k];
-      }
-    }
+    ans ^= a[i];
   }
-  for (int i = n - 1; i >= 1; --i) {
-    for (int j = i + 1; j <= n; ++j) {
-      a[i][n + 1] -= a[i][j] * a[j][n + 1];
-    }
-  }
-  for (int i = 1; i <= n; ++i) {
-    printf("%.2lf\n", a[i][n + 1]);
-  }
+  write(ans), EL;
   return 0;
 }
 
@@ -113,4 +94,11 @@ inline void write(const T &Wr) {
       putchar((Wr % 10) + '0');
     }
   }
+}
+
+ui getnxt() {
+  seed ^= seed << 13;
+  seed ^= seed >> 17;
+  seed ^= seed << 5;
+  return seed;
 }

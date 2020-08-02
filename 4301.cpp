@@ -10,7 +10,6 @@
 #include <cmath>
 #include <queue>
 #include <stack>
-#include <ctime>
 #include <set>
 #include <map>
 
@@ -36,50 +35,37 @@ using std::max;
 using std::abs;
 using std::sort;
 
-const int N = 105;
-const double eps = 1e-6;
+const int N = 30;
+const int M = 105;
 
-double a[N][N];
-int n;
+int B[N];
+int a[M];
 
 int main () {
+  int n;
   read(n);
   for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= n + 1; ++j) {
-      scanf("%lf", &a[i][j]);
-    }
+    read(a[i]);
   }
+  sort(a + 1, a + n + 1, std::greater<int>());
+  ll ans = 0;
   for (int i = 1; i <= n; ++i) {
-    int md = i;
-    for (int j = i + 1; j <= n; ++j) {
-      if (abs(a[j][i]) > abs(a[md][i])) {
-        md = j;
+    int tmp = a[i];
+    for (int j = 30; j >= 0; --j) {
+      if (tmp & (1 << j)) {
+        if (!B[j]) {
+          B[j] = tmp;
+          break;
+        } else {
+          tmp ^= B[j];
+        }
       }
     }
-    if (abs(a[md][i]) < eps) {
-      puts("No Solution");
-      return 0;
-    }
-    if (i != md) {
-      std::swap(a[i], a[md]);
-    }
-    for (int j = n + 1; j >= i; --j) {
-      a[i][j] /= a[i][i];
-    }
-    for (int j = i + 1; j <= n; ++j) {
-      for (int k = n + 1; k >= i; --k) {
-        a[j][k] -= a[j][i] * a[i][k];
-      }
+    if (!tmp) {
+      ans += a[i];
     }
   }
-  for (int i = n - 1; i >= 1; --i) {
-    for (int j = i + 1; j <= n; ++j) {
-      a[i][n + 1] -= a[i][j] * a[j][n + 1];
-    }
-  }
-  for (int i = 1; i <= n; ++i) {
-    printf("%.2lf\n", a[i][n + 1]);
-  }
+  write(ans), EL;
   return 0;
 }
 

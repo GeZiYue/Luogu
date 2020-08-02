@@ -13,6 +13,7 @@
 #include <ctime>
 #include <set>
 #include <map>
+#include <unordered_map>
 
 #define isNum(a) (a >= '0' && a <= '9')
 #define SP putchar(' ')
@@ -36,49 +37,47 @@ using std::max;
 using std::abs;
 using std::sort;
 
-const int N = 105;
-const double eps = 1e-6;
+const int N = 2000000;
 
-double a[N][N];
-int n;
+ll getphi(int);
+ll getmu(int);
+
+bool isp[N + 5];
+int pri[N + 5], id;
+ll phi[N + 5], mu[N + 5];
+std::unordered_map<int, ll> ansp, ansm;
+int t;
 
 int main () {
-  read(n);
-  for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= n + 1; ++j) {
-      scanf("%lf", &a[i][j]);
+  phi[1] = mu[1] = 1;
+  for (int i = 2; i <= N; ++i) {
+    if (!isp[i]) {
+      pri[++id] = i;
+      mu[i] = -1;
+      phi[i] = i - 1;
     }
-  }
-  for (int i = 1; i <= n; ++i) {
-    int md = i;
-    for (int j = i + 1; j <= n; ++j) {
-      if (abs(a[j][i]) > abs(a[md][i])) {
-        md = j;
-      }
-    }
-    if (abs(a[md][i]) < eps) {
-      puts("No Solution");
-      return 0;
-    }
-    if (i != md) {
-      std::swap(a[i], a[md]);
-    }
-    for (int j = n + 1; j >= i; --j) {
-      a[i][j] /= a[i][i];
-    }
-    for (int j = i + 1; j <= n; ++j) {
-      for (int k = n + 1; k >= i; --k) {
-        a[j][k] -= a[j][i] * a[i][k];
+    for (int j = 1; j <= id && i * pri[j] <= N; ++j) {
+      isp[i * pri[j]] = true;
+      if (i % pri[j]) {
+        mu[i * pri[j]] = -mu[i];
+        phi[i * pri[j]] = phi[i] * (pri[j] - 1);
+      } else {
+        mu[i * pri[j]] = 0;
+        phi[i * pri[j]] = phi[i] * pri[j];
+        break;
       }
     }
   }
-  for (int i = n - 1; i >= 1; --i) {
-    for (int j = i + 1; j <= n; ++j) {
-      a[i][n + 1] -= a[i][j] * a[j][n + 1];
-    }
+  for (int i = 2; i <= N; ++i) {
+    mu[i] += mu[i - 1];
+    phi[i] += phi[i - 1];
   }
-  for (int i = 1; i <= n; ++i) {
-    printf("%.2lf\n", a[i][n + 1]);
+  int t;
+  read(t);
+  while (t--) {
+    int n;
+    read(n);
+    write(getphi(n)), SP, write(getmu(n)), EL;
   }
   return 0;
 }
@@ -113,4 +112,33 @@ inline void write(const T &Wr) {
       putchar((Wr % 10) + '0');
     }
   }
+}
+
+ll getphi(int n) {
+  if (n <= N) {
+    return phi[n];
+  }
+  if (ansp.count(n)) {
+    return ansp[n];
+  }
+  ll ans = 0;
+  for (ll l = 2, r; l <= n; l = r + 1) {
+    r = n / (n / l);
+    ans += (r - l + 1) * getphi(n / l);
+  }
+  return ansp[n] = n * 1ull * (n + 1ll) / 2 - ans;
+}
+ll getmu(int n) {
+  if (n <= N) {
+    return mu[n];
+  }
+  if (ansm.count(n)) {
+    return ansm[n];
+  }
+  ll ans = 0;
+  for (ll l = 2, r; l <= n; l = r + 1) {
+    r = n / (n / l);
+    ans += (r - l + 1) * getmu(n / l);
+  }
+  return ansm[n] = 1 - ans;
 }

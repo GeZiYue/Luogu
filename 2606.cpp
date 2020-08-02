@@ -36,50 +36,41 @@ using std::max;
 using std::abs;
 using std::sort;
 
-const int N = 105;
-const double eps = 1e-6;
+const int N = 1000005;
 
-double a[N][N];
-int n;
+int pow(int, int, int);
+int C(int, int);
+
+int fac[N], ifac[N];
+int lg2[N];
+int f[N];
+int n, mod;
 
 int main () {
-  read(n);
-  for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= n + 1; ++j) {
-      scanf("%lf", &a[i][j]);
-    }
+  read(n), read(mod);
+  fac[0] = 1;
+  int lim = min(n, mod - 1);
+  for (int i = 1; i <= lim; ++i) {
+    fac[i] = fac[i - 1] * 1ll * i % mod;
   }
-  for (int i = 1; i <= n; ++i) {
-    int md = i;
-    for (int j = i + 1; j <= n; ++j) {
-      if (abs(a[j][i]) > abs(a[md][i])) {
-        md = j;
-      }
-    }
-    if (abs(a[md][i]) < eps) {
-      puts("No Solution");
-      return 0;
-    }
-    if (i != md) {
-      std::swap(a[i], a[md]);
-    }
-    for (int j = n + 1; j >= i; --j) {
-      a[i][j] /= a[i][i];
-    }
-    for (int j = i + 1; j <= n; ++j) {
-      for (int k = n + 1; k >= i; --k) {
-        a[j][k] -= a[j][i] * a[i][k];
-      }
-    }
+  ifac[lim] = pow(fac[lim], mod - 2, mod);
+  for (int i = lim - 1; i >= 0; --i) {
+    ifac[i] = ifac[i + 1] * 1ll * (i + 1) % mod;
   }
-  for (int i = n - 1; i >= 1; --i) {
-    for (int j = i + 1; j <= n; ++j) {
-      a[i][n + 1] -= a[i][j] * a[j][n + 1];
+  for (int i = 2; i <= n; ++i) {
+    lg2[i] = lg2[i >> 1] + 1;
+  }
+  f[1] = f[2] = 1;
+  f[3] = 2;
+  for (int i = 4, l = 1, r = 1; i <= n; ++i) {
+    if (i - (1 << lg2[i]) + 1 <= (1 << (lg2[i] - 1))) {
+      ++l;
+    } else {
+      ++r;
     }
+    f[i] = C(i - 1, l) * 1ll * f[l] % mod * f[r] % mod;
   }
-  for (int i = 1; i <= n; ++i) {
-    printf("%.2lf\n", a[i][n + 1]);
-  }
+  write(f[n]), EL;
   return 0;
 }
 
@@ -113,4 +104,25 @@ inline void write(const T &Wr) {
       putchar((Wr % 10) + '0');
     }
   }
+}
+
+int pow(int a, int b, int m) {
+  int ans = 1, now = a;
+  while (b) {
+    if (b & 1) {
+      ans = ans * 1ll * now % m;
+    }
+    now = now * 1ll * now % m;
+    b >>= 1;
+  }
+  return ans;
+}
+int C(int n, int m) {
+  if (m == 0) {
+    return 1;
+  }
+  if (n < m) {
+    return 0;
+  }
+  return C(n / mod, m / mod) * 1ll * fac[n] % mod * ifac[m] % mod * ifac[n - m] % mod;
 }

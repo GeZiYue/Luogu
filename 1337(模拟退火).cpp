@@ -36,50 +36,31 @@ using std::max;
 using std::abs;
 using std::sort;
 
-const int N = 105;
-const double eps = 1e-6;
+const int N = 1005;
+const double dwn = 0.996;
 
-double a[N][N];
+double dis(double, double, double, double);
+double calc_energy(double, double);
+void get_ans();
+
+double ansx, ansy, anse;
+int x[N], y[N], m[N];
 int n;
 
 int main () {
   read(n);
   for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= n + 1; ++j) {
-      scanf("%lf", &a[i][j]);
-    }
+    read(x[i]), read(y[i]), read(m[i]);
+    ansx += x[i], ansy += y[i];
   }
-  for (int i = 1; i <= n; ++i) {
-    int md = i;
-    for (int j = i + 1; j <= n; ++j) {
-      if (abs(a[j][i]) > abs(a[md][i])) {
-        md = j;
-      }
-    }
-    if (abs(a[md][i]) < eps) {
-      puts("No Solution");
-      return 0;
-    }
-    if (i != md) {
-      std::swap(a[i], a[md]);
-    }
-    for (int j = n + 1; j >= i; --j) {
-      a[i][j] /= a[i][i];
-    }
-    for (int j = i + 1; j <= n; ++j) {
-      for (int k = n + 1; k >= i; --k) {
-        a[j][k] -= a[j][i] * a[i][k];
-      }
-    }
-  }
-  for (int i = n - 1; i >= 1; --i) {
-    for (int j = i + 1; j <= n; ++j) {
-      a[i][n + 1] -= a[i][j] * a[j][n + 1];
-    }
-  }
-  for (int i = 1; i <= n; ++i) {
-    printf("%.2lf\n", a[i][n + 1]);
-  }
+  ansx /= n, ansy /= n;
+  anse = calc_energy(ansx, ansy);
+  get_ans();
+  get_ans();
+  get_ans();
+  get_ans();
+  std::cout.precision(3);
+  std::cout << std::fixed << ansx << ' ' << ansy << std::endl;
   return 0;
 }
 
@@ -112,5 +93,32 @@ inline void write(const T &Wr) {
       write(Wr / 10);
       putchar((Wr % 10) + '0');
     }
+  }
+}
+
+double dis(double x1, double y1, double x2, double y2) {
+  return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+}
+double calc_energy(double x1, double y1) {
+  double ans = 0;
+  for (int i = 1; i <= n; ++i) {
+    ans += dis(x[i], y[i], x1, y1) * m[i];
+  }
+  return ans;
+}
+void get_ans() {
+  double temp = 4000;
+  while (temp > 1e-15) {
+    double x1 = ansx + (2 * rand() - RAND_MAX) * temp;
+    double y1 = ansy + (2 * rand() - RAND_MAX) * temp;
+    double e1 = calc_energy(x1, y1);
+    if (e1 < anse) {
+      ansx = x1, ansy = y1, anse = e1;
+    } else {
+      if (exp((anse - e1) / temp) * RAND_MAX > rand()) {
+        ansx = x1, ansy = y1;
+      }
+    }
+    temp *= dwn;
   }
 }

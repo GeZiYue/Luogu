@@ -10,7 +10,6 @@
 #include <cmath>
 #include <queue>
 #include <stack>
-#include <ctime>
 #include <set>
 #include <map>
 
@@ -36,49 +35,19 @@ using std::max;
 using std::abs;
 using std::sort;
 
-const int N = 105;
-const double eps = 1e-6;
+double f(double);
+double simpson(double, double);
+double solve(double, double, double, double);
 
-double a[N][N];
-int n;
+double a;
 
 int main () {
-  read(n);
-  for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= n + 1; ++j) {
-      scanf("%lf", &a[i][j]);
-    }
-  }
-  for (int i = 1; i <= n; ++i) {
-    int md = i;
-    for (int j = i + 1; j <= n; ++j) {
-      if (abs(a[j][i]) > abs(a[md][i])) {
-        md = j;
-      }
-    }
-    if (abs(a[md][i]) < eps) {
-      puts("No Solution");
-      return 0;
-    }
-    if (i != md) {
-      std::swap(a[i], a[md]);
-    }
-    for (int j = n + 1; j >= i; --j) {
-      a[i][j] /= a[i][i];
-    }
-    for (int j = i + 1; j <= n; ++j) {
-      for (int k = n + 1; k >= i; --k) {
-        a[j][k] -= a[j][i] * a[i][k];
-      }
-    }
-  }
-  for (int i = n - 1; i >= 1; --i) {
-    for (int j = i + 1; j <= n; ++j) {
-      a[i][n + 1] -= a[i][j] * a[j][n + 1];
-    }
-  }
-  for (int i = 1; i <= n; ++i) {
-    printf("%.2lf\n", a[i][n + 1]);
+  std::cin >> a;
+  if (a < 0) {
+    puts("orz");
+  } else {
+    std::cout.precision(5);
+    std::cout << std::fixed << solve(1e-7, 20, 1e-7, simpson(1e-7, 20)) << std::endl;
   }
   return 0;
 }
@@ -112,5 +81,21 @@ inline void write(const T &Wr) {
       write(Wr / 10);
       putchar((Wr % 10) + '0');
     }
+  }
+}
+
+double f(double x) {
+  return pow(x, a / x - x);
+}
+double simpson(double l, double r) {
+  return (r - l) * (f(l) + f(r) + f((l + r) / 2) * 4) / 6;
+}
+double solve(double l, double r, double eps, double A) {
+  double m = (l + r) / 2;
+  double L = simpson(l, m), R = simpson(m, r);
+  if (abs(L + R - A) <= 15 * eps) {
+    return L + R + (L + R - A) / 15;
+  } else {
+    return solve(l, m, eps / 2, L) + solve(m, r, eps / 2, R);
   }
 }

@@ -36,50 +36,32 @@ using std::max;
 using std::abs;
 using std::sort;
 
-const int N = 105;
-const double eps = 1e-6;
+const int N = 1005;
+const double dwn = 0.9;
 
-double a[N][N];
+void calc();
+
+double ansx, ansy;
+double move = 5000;
+int x[N], y[N], m[N];
 int n;
 
 int main () {
   read(n);
   for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= n + 1; ++j) {
-      scanf("%lf", &a[i][j]);
+    read(x[i]), read(y[i]), read(m[i]);
+  }
+  while (true) {
+    double tmpx = ansx, tmpy = ansy;
+    calc();
+    if (abs(tmpx - ansx) < 1e-4 && abs(tmpy - ansy) < 1e-4) {
+      break;
+    } else {
+      move *= dwn;
     }
   }
-  for (int i = 1; i <= n; ++i) {
-    int md = i;
-    for (int j = i + 1; j <= n; ++j) {
-      if (abs(a[j][i]) > abs(a[md][i])) {
-        md = j;
-      }
-    }
-    if (abs(a[md][i]) < eps) {
-      puts("No Solution");
-      return 0;
-    }
-    if (i != md) {
-      std::swap(a[i], a[md]);
-    }
-    for (int j = n + 1; j >= i; --j) {
-      a[i][j] /= a[i][i];
-    }
-    for (int j = i + 1; j <= n; ++j) {
-      for (int k = n + 1; k >= i; --k) {
-        a[j][k] -= a[j][i] * a[i][k];
-      }
-    }
-  }
-  for (int i = n - 1; i >= 1; --i) {
-    for (int j = i + 1; j <= n; ++j) {
-      a[i][n + 1] -= a[i][j] * a[j][n + 1];
-    }
-  }
-  for (int i = 1; i <= n; ++i) {
-    printf("%.2lf\n", a[i][n + 1]);
-  }
+  std::cout.precision(3);
+  std::cout << std::fixed << ansx << ' ' << ansy << std::endl;
   return 0;
 }
 
@@ -113,4 +95,23 @@ inline void write(const T &Wr) {
       putchar((Wr % 10) + '0');
     }
   }
+}
+
+void calc() {
+  double mx = 0, my = 0;
+  for (int i = 1; i <= n; ++i) {
+    double tx = x[i] - ansx, ty = y[i] - ansy;
+    double tv = sqrt(tx * tx + ty * ty);
+    if (abs(tv) < 1e-7) {
+      continue;
+    }
+    mx += (m[i] * tx / tv);
+    my += (m[i] * ty / tv);
+  }
+  double mv = sqrt(mx * mx + my * my);
+  if (abs(mv) < 1e-7) {
+    return;
+  }
+  ansx += (move * mx / mv);
+  ansy += (move * my / mv);
 }

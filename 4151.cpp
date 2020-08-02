@@ -36,50 +36,31 @@ using std::max;
 using std::abs;
 using std::sort;
 
-const int N = 105;
-const double eps = 1e-6;
+const int N = 50005;
+const int M = 200005;
 
-double a[N][N];
-int n;
+void add(int, int, ll);
+void dfs(int, ll);
+void insert(ll);
+ll query(ll);
+
+int hed[N], nxt[M], to[M], id;
+ll dis[M];
+bool vis[N];
+ll w[N];
+ll v[65];
+int n, m;
 
 int main () {
-  read(n);
-  for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= n + 1; ++j) {
-      scanf("%lf", &a[i][j]);
-    }
+  read(n), read(m);
+  for (int i = 1; i <= m; ++i) {
+    int u, v;
+    ll w;
+    read(u), read(v), read(w);
+    add(u, v, w), add(v, u, w);
   }
-  for (int i = 1; i <= n; ++i) {
-    int md = i;
-    for (int j = i + 1; j <= n; ++j) {
-      if (abs(a[j][i]) > abs(a[md][i])) {
-        md = j;
-      }
-    }
-    if (abs(a[md][i]) < eps) {
-      puts("No Solution");
-      return 0;
-    }
-    if (i != md) {
-      std::swap(a[i], a[md]);
-    }
-    for (int j = n + 1; j >= i; --j) {
-      a[i][j] /= a[i][i];
-    }
-    for (int j = i + 1; j <= n; ++j) {
-      for (int k = n + 1; k >= i; --k) {
-        a[j][k] -= a[j][i] * a[i][k];
-      }
-    }
-  }
-  for (int i = n - 1; i >= 1; --i) {
-    for (int j = i + 1; j <= n; ++j) {
-      a[i][n + 1] -= a[i][j] * a[j][n + 1];
-    }
-  }
-  for (int i = 1; i <= n; ++i) {
-    printf("%.2lf\n", a[i][n + 1]);
-  }
+  dfs(1, 0);
+  write(query(w[n])), EL;
   return 0;
 }
 
@@ -113,4 +94,43 @@ inline void write(const T &Wr) {
       putchar((Wr % 10) + '0');
     }
   }
+}
+
+void add(int u, int v, ll w) {
+  nxt[++id] = hed[u];
+  hed[u] = id;
+  to[id] = v;
+  dis[id] = w;
+}
+void dfs(int u, ll res) {
+  w[u] = res;
+  vis[u] = true;
+  for (int i = hed[u]; i; i = nxt[i]) {
+    int v = to[i];
+    if (!vis[v]) {
+      dfs(v, res ^ dis[i]);
+    } else {
+      insert(res ^ dis[i] ^ w[v]);
+    }
+  }
+}
+void insert(ll x) {
+  for (int i = 60; i >= 0; --i) {
+    if (x & (1ll << i)) {
+      if (!v[i]) {
+        v[i] = x;
+        break;
+      } else {
+        x ^= v[i];
+      }
+    }
+  }
+}
+ll query(ll x) {
+  for (int i = 60; i >= 0; --i) {
+    if ((x ^ v[i]) > x) {
+      x ^= v[i];
+    }
+  }
+  return x;
 }
