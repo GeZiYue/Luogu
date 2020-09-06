@@ -1,5 +1,5 @@
 *.exe
 .vs
 tmp.cpp
-.in
-.out
+*.in
+*.out
