@@ -1,222 +1,259 @@
-#include<iostream>
-#include<cstdio>
-#include<cmath>
-#include<cstring>
-#include<cstdlib>
-using namespace std;
-#define N 50005
-#define ls(n) (n<<1)
-#define rs(n) (n<<1|1)
-#define gswap(x,y) (x^=y^=x^=y)
-#define mid(x,y) ((x+y)>>1)
-#define inf 2147483647
-#define isNum(a) (a>='0'&&a<='9')
-int hed[N],nxt[2*N],to[2*N];
-int dep[N],siz[N],son[N],fa[N],top[N],go[N],back[N];
-int maxn[4*N],minn[4*N],ansn[4*N],tag[4*N];
-int value[N];
-int id1,id2;
-int n;
-template<class T1>void read(T1 &r_e_a_d);
-void add(int x,int y);
-void DFS1(int x);
-void DFS2(int x);
-void Tree_Build(int x,int xL,int xR);
-void Tree_Push_Down(int x);
-void Tree_Push_Up(int x);
-void Tree_Update(int x,int xL,int xR,int uL,int uR,int num);
-int Tree_Query(int x,int xL,int xR,int uL,int uR);
-int Tree_Query_Max(int x,int xL,int xR,int uL,int uR);
-int Tree_Query_Min(int x,int xL,int xR,int uL,int uR);
-void Fin_Update(int x,int y,int num);
-int Fin_Query(int x,int y);
-int Get_Answer(int x,int y,int num);
-int main(){
-    int m,i,a,b,v;
-    read(n);
-    for(i=1;i<=n;i++){
-        read(value[i]);
-    }
-    for(i=1;i<n;i++){
-        read(a);
-        read(b);
-        add(a,b);
-        add(b,a);
-    }
-    DFS1(1);
-    top[1]=1;
-    DFS2(1);
-    Tree_Build(1,1,n);
-    read(m);
-    for(i=1;i<=m;i++){
-        read(a);
-        read(b);
-        read(v);
-        printf("%d\n",Get_Answer(a,b,v));
-    }
-    return 0;
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
+#include <complex>
+#include <cstdio>
+#include <string>
+#include <vector>
+#include <bitset>
+#include <cmath>
+#include <queue>
+#include <stack>
+#include <ctime>
+#include <set>
+#include <map>
+
+#define isNum(a) (a >= '0' && a <= '9')
+#define SP putchar(' ')
+#define EL putchar('\n')
+#define File(a) freopen(a ".in", "r", stdin), freopen(a ".out", "w", stdout)
+
+template<class T>
+void read(T&);
+template<class T>
+void write(const T&);
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef const long long & cll;
+typedef const int & ci;
+typedef std::pair<int, int> pii;
+const int iinf = 2147483647;
+const ll llinf = 9223372036854775807ll;
+using std::min;
+using std::max;
+using std::abs;
+using std::sort;
+
+const int N = 50005;
+const int M = 100005;
+const int Lm = 1000000000;
+#define lc(x) (x << 1)
+#define rc(x) (x << 1 | 1)
+
+class Info {
+public:
+  int minn, maxn, ansl, ansr;
+  Info(int mi = 0, int mx = 0, int al = 0, int ar = 0) : minn(mi), maxn(mx), ansl(al), ansr(ar) {}
+};
+
+void add(int u, int v);
+void dfs1(int u);
+void dfs2(int u);
+Info merge(Info i, Info j);
+void Seg_build(int x, int xl, int xr);
+void Seg_update(int x, int xl, int xr, int ul, int ur, int num);
+Info Seg_query(int x, int xl, int xr, int ql, int qr);
+void update(int u, int v, int num);
+int query(int u, int v);
+
+int hed[N], nxt[M], to[M], id;
+int fa[N], dep[N], son[N], siz[N], top[N], ttl[N], ltt[N], id2;
+int val[N];
+Info seg[N << 2];
+int tag[N << 2];
+int n, q;
+
+int main () {
+  read(n);
+  for (int i = 1; i <= n; ++i) {
+    read(val[i]);
+  }
+  for (int i = 1; i < n; ++i) {
+    int u, v;
+    read(u), read(v);
+    add(u, v), add(v, u);
+  }
+  dfs1(1);
+  dfs2(1);
+  Seg_build(1, 1, n);
+  read(q);
+  for (int i = 1; i <= q; ++i) {
+    int u, v, num;
+    read(u), read(v), read(num);
+    write(query(u, v)), EL;
+    update(u, v, num);
+  }
+  return 0;
 }
-template<class T1>void read(T1 &r_e_a_d){
-    T1 k=0;
-    char ch=getchar();
-    int flag=1;
-    while(!isNum(ch)){
-        ch=getchar();
-        if(ch=='-'){
-            flag=-1;
-        }
+
+template<class T>
+inline void read(T &Re) {
+  T k = 0;
+  char ch = getchar();
+  int flag = 1;
+  while (!isNum(ch)) {
+    if (ch == '-') {
+      flag = -1;
     }
-    while(isNum(ch)){
-        k=(k<<1)+(k<<3)+ch-'0';
-        ch=getchar();
+    ch = getchar();
+  }
+  while (isNum(ch)) {
+    k = (k << 1) + (k << 3) + ch - '0';
+    ch = getchar();
+  }
+  Re = flag * k;
+}
+template<class T>
+inline void write(const T &Wr) {
+  if (Wr < 0) {
+    putchar('-');
+    write(-Wr);
+  } else {
+    if (Wr < 10) {
+      putchar(Wr + '0');
+    } else {
+      write(Wr / 10);
+      putchar((Wr % 10) + '0');
     }
-    r_e_a_d=flag*k;
+  }
 }
-void add(int x,int y){
-    nxt[++id1]=hed[x];
-    hed[x]=id1;
-    to[id1]=y;
+
+void add(int u, int v) {
+  nxt[++id] = hed[u];
+  hed[u] = id;
+  to[id] = v;
 }
-void DFS1(int x){
-    siz[x]=1;
-    dep[x]=dep[fa[x]]+1;
-    for(int i=hed[x];i;i=nxt[i]){
-        if(fa[x]!=to[i]){
-            fa[to[i]]=x;
-            DFS1(to[i]);
-            siz[x]+=siz[to[i]];
-            if(son[x]==0||siz[to[i]]>siz[son[x]]){
-                son[x]=to[i];
-            }
-        }
+void dfs1(int u) {
+  siz[u] = 1;
+  for (int i = hed[u]; i; i = nxt[i]) {
+    int v = to[i];
+    if (v != fa[u]) {
+      dep[v] = dep[u] + 1;
+      fa[v] = u;
+      dfs1(v);
+      siz[u] += siz[v];
+      if (siz[v] > siz[son[u]]) {
+        son[u] = v;
+      }
     }
+  }
 }
-void DFS2(int x){
-    go[x]=++id2;
-    back[id2]=value[x];
-    if(son[x]){
-        top[son[x]]=top[x];
-        DFS2(son[x]);
+void dfs2(int u) {
+  ttl[u] = ++id2;
+  ltt[id2] = u;
+  if (son[u]) {
+    top[son[u]] = top[u];
+    dfs2(son[u]);
+  }
+  for (int i = hed[u]; i; i = nxt[i]) {
+    int v = to[i];
+    if (v != fa[u] && v != son[u]) {
+      top[v] = v;
+      dfs2(v);
     }
-    for(int i=hed[x];i;i=nxt[i]){
-        if(fa[x]!=to[i]&&son[x]!=to[i]){
-            top[to[i]]=to[i];
-            DFS2(to[i]);
-        }
+  }
+}
+Info merge(Info i, Info j) {
+  return Info(
+    min(i.minn, j.minn),
+    max(i.maxn, j.maxn),
+    max(max(i.ansl, j.ansl), j.maxn - i.minn),
+    max(max(i.ansr, j.ansr), i.maxn - j.minn)
+  );
+}
+void Seg_down(int x) {
+  if (tag[x]) {
+    seg[lc(x)].minn += tag[x];
+    seg[rc(x)].minn += tag[x];
+    seg[lc(x)].maxn += tag[x];
+    seg[rc(x)].maxn += tag[x];
+    tag[lc(x)] += tag[x];
+    tag[rc(x)] += tag[x];
+    tag[x] = 0;
+  }
+}
+void Seg_build(int x, int xl, int xr) {
+  if (xl == xr) {
+    seg[x] = Info(val[ltt[xl]], val[ltt[xr]]);
+    return;
+  }
+  int xm = (xl + xr) >> 1;
+  Seg_build(lc(x), xl, xm);
+  Seg_build(rc(x), xm + 1, xr);
+  seg[x] = merge(seg[lc(x)], seg[rc(x)]);
+}
+void Seg_update(int x, int xl, int xr, int ul, int ur, int num) {
+  if (ul <= xl && xr <= ur) {
+    tag[x] += num;
+    seg[x].minn += num;
+    seg[x].maxn += num;
+    return;
+  }
+  Seg_down(x);
+  int xm = (xl + xr) >> 1;
+  if (ul <= xm) {
+    Seg_update(lc(x), xl, xm, ul, ur, num);
+  }
+  if (ur > xm) {
+    Seg_update(rc(x), xm + 1, xr, ul, ur, num);
+  }
+  seg[x] = merge(seg[lc(x)], seg[rc(x)]);
+}
+Info Seg_query(int x, int xl, int xr, int ql, int qr) {
+  if (ql <= xl && xr <= qr) {
+    return seg[x];
+  }
+  Seg_down(x);
+  int xm = (xl + xr) >> 1;
+  Info ans(Lm);
+  if (ql <= xm) {
+    ans = merge(ans, Seg_query(lc(x), xl, xm, ql, qr));
+  }
+  if (qr > xm) {
+    ans = merge(ans, Seg_query(rc(x), xm + 1, xr, ql, qr));
+  }
+  return ans;
+}
+void update(int u, int v, int num) {
+  while (top[u] != top[v]) {
+    if (dep[top[u]] > dep[top[v]]) {
+      Seg_update(1, 1, n, ttl[top[u]], ttl[u], num);
+      u = fa[top[u]];
+    } else {
+      Seg_update(1, 1, n, ttl[top[v]], ttl[v], num);
+      v = fa[top[v]];
     }
+  }
+  if (dep[u] < dep[v]) {
+    Seg_update(1, 1, n, ttl[u], ttl[v], num);
+  } else {
+    Seg_update(1, 1, n, ttl[v], ttl[u], num);
+  }
 }
-void Tree_Build(int x,int xL,int xR){
-    if(xL==xR){
-        maxn[x]=minn[x]=back[xL];
-    }else{
-        int M=mid(xL,xR);
-        Tree_Build(ls(x),xL,M);
-        Tree_Build(rs(x),M+1,xR);
-        Tree_Push_Up(x);
+int query(int u, int v) {
+  Info l(Lm), r(Lm);
+  while (top[u] != top[v]) {
+    if (dep[top[u]] > dep[top[v]]) {
+      Info tmp = Seg_query(1, 1, n, ttl[top[u]], ttl[u]);
+      std::swap(tmp.ansl, tmp.ansr);
+      l = merge(l, tmp);
+      u = fa[top[u]];
+    } else {
+      Info tmp = Seg_query(1, 1, n, ttl[top[v]], ttl[v]);
+      r = merge(tmp, r);
+      v = fa[top[v]];
     }
+  }
+  if (dep[u] > dep[v]) {
+    Info tmp = Seg_query(1, 1, n, ttl[v], ttl[u]);
+    std::swap(tmp.ansl, tmp.ansr);
+    l = merge(l, tmp);
+  } else {
+    Info tmp = Seg_query(1, 1, n, ttl[u], ttl[v]);
+    r = merge(tmp, r);
+  }
+  return merge(l, r).ansl;
 }
-void Tree_Push_Down(int x){
-    maxn[ls(x)]+=tag[x];
-    minn[ls(x)]+=tag[x];
-    tag[ls(x)]+=tag[x];
-    maxn[rs(x)]+=tag[x];
-    minn[rs(x)]+=tag[x];
-    tag[rs(x)]+=tag[x];
-    tag[x]=0;
-}
-void Tree_Push_Up(int x){
-    maxn[x]=max(maxn[ls(x)],maxn[rs(x)]);
-    minn[x]=min(minn[ls(x)],minn[rs(x)]);
-    ansn[x]=max(max(ansn[ls(x)],ansn[rs(x)]),maxn[rs(x)]-minn[ls(x)]);
-}
-void Tree_Update(int x,int xL,int xR,int uL,int uR,int num){
-    if(xL>=uL&&xR<=uR){
-        maxn[x]+=num;
-        minn[x]+=num;
-        tag[x]+=num;
-    }else{
-        if(xR>=uL&&xL<=uR){
-            Tree_Push_Down(x);
-            int M=mid(xL,xR);
-            Tree_Update(ls(x),xL,M,uL,uR,num);
-            Tree_Update(rs(x),M+1,xR,uL,uR,num);
-            Tree_Push_Up(x);
-        }
-    }
-}
-int Tree_Query(int x,int xL,int xR,int uL,int uR){
-    if(xL>=uL&&xR<=uR){
-        return ansn[x];
-    }else{
-        if(xR>=uL&&xL<=uR){
-            Tree_Push_Down(x);
-            int M=mid(xL,xR);
-            return max(Tree_Query(ls(x),xL,M,uL,uR),Tree_Query(rs(x),M+1,xR,uL,uR));
-        }else{
-            return -inf;
-        }
-    }
-}
-int Tree_Query_Max(int x,int xL,int xR,int uL,int uR){
-    if(xL>=uL&&xR<=uR){
-        return maxn[x];
-    }else{
-        if(xR>=uL&&xL<=uR){
-            Tree_Push_Down(x);
-            int M=mid(xL,xR);
-            return max(Tree_Query_Max(ls(x),xL,M,uL,uR),Tree_Query_Max(rs(x),M+1,xR,uL,uR));
-        }else{
-            return -inf;
-        }
-    }
-}
-int Tree_Query_Min(int x,int xL,int xR,int uL,int uR){
-    if(xL>=uL&&xR<=uR){
-        return minn[x];
-    }else{
-        if(xR>=uL&&xL<=uR){
-            Tree_Push_Down(x);
-            int M=mid(xL,xR);
-            return max(Tree_Query_Min(ls(x),xL,M,uL,uR),Tree_Query_Min(rs(x),M+1,xR,uL,uR));
-        }else{
-            return inf;
-        }
-    }
-}
-void Fin_Update(int x,int y,int num){
-    while(top[x]!=top[y]){
-        if(dep[top[x]]<dep[top[y]]){
-            gswap(x,y);
-        }
-        Tree_Update(1,1,n,go[top[x]],go[x],num);
-        x=fa[top[x]];
-    }
-    if(dep[x]>dep[y]){
-        gswap(x,y);
-    }
-    Tree_Update(1,1,n,go[x],go[y],num);
-}
-int Fin_Query(int x,int y){
-    int Ans=-inf;
-    int Util_Min=inf;
-    while(top[x]!=top[y]){
-        if(dep[top[x]]<dep[top[y]]){
-            gswap(x,y);
-        }
-        Ans=max(Ans,Tree_Query(1,1,n,go[top[x]],go[x]));
-        Ans=max(Ans,Tree_Query_Max(1,1,n,go[top[x]],go[x])-Util_Min);
-        Util_Min=min(Util_Min,Tree_Query_Min(1,1,n,go[top[x]],go[x]));
-        cout<<Tree_Query(1,1,n,go[top[x]],go[x])<<endl;
-        x=fa[top[x]];
-    }
-    if(dep[x]>dep[y]){
-        gswap(x,y);
-    }
-    Ans=max(Ans,Tree_Query(1,1,n,go[x],go[y]));
-    Ans=max(Ans,Tree_Query_Max(1,1,n,go[top[x]],go[x])-Util_Min);
-    return Ans;
-}
-int Get_Answer(int x,int y,int num){
-    Fin_Update(x,y,num);
-    return Fin_Query(x,y);
-}
+

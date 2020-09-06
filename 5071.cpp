@@ -57,7 +57,7 @@ public:
     return (i.l / B == j.l / B) ? (i.r < j.r) : (i.l < j.l);
   }
 } Q[N];
-int p[N], id1 = 168, id;
+int p[N], id;
 bool isp[N];
 int a[N], b[N];
 int sm[170][N];
@@ -69,7 +69,8 @@ int n, q;
 std::mt19937 rnd(19260817);
 
 int main () {
-  getp(31623);
+  File("5071");
+  getp(1000);
   read(n), read(q);
   inv[1] = 1;
   for (int i = 2; i <= (n << 1); ++i) {
@@ -78,7 +79,7 @@ int main () {
   B = int(sqrt(n));
   for (int i = 1; i <= n; ++i) {
     read(a[i]);
-    for (int j = 1; j <= id1; ++j) {
+    for (int j = 1; j <= id; ++j) {
       int k = 0;
       while (a[i] % p[j] == 0) {
         a[i] /= p[j];
@@ -93,6 +94,8 @@ int main () {
         tot[++m] = b[i] = fac(a[i]);
         tot[++m] = a[i] = a[i] / b[i];
       }
+    } else {
+      a[i] = 0;
     }
   }
   sort(tot + 1, tot + m + 1);
@@ -130,7 +133,7 @@ int main () {
     }
     int &anow = ans[Q[i].id];
     anow = now;
-    for (int j = 1; j <= id1; ++j) {
+    for (int j = 1; j <= id; ++j) {
       anow = anow * 1ll * (sm[j][r] - sm[j][l - 1] + 1) % Mod;
     }
   }
