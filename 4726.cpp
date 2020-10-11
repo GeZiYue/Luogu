@@ -1,37 +1,35 @@
 #include <algorithm>
-#include <iostream>
-#include <cstring>
-#include <cstdlib>
-#include <complex>
-#include <cstdio>
-#include <string>
-#include <vector>
 #include <bitset>
 #include <cmath>
-#include <queue>
-#include <stack>
-#include <set>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
 #include <map>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <vector>
 
 #define isNum(a) (a >= '0' && a <= '9')
 #define SP putchar(' ')
 #define EL putchar('\n')
 #define File(a) freopen(a ".in", "r", stdin), freopen(a ".out", "w", stdout)
 
-template<class T>
-void read(T&);
-template<class T>
-void write(const T&);
+template <class T> void read(T &);
+template <class T> void write(const T &);
 
 typedef long long ll;
-typedef const long long & cll;
-typedef const int & ci;
+typedef const long long &cll;
+typedef const int &ci;
 typedef std::pair<int, int> pii;
 const int iinf = 2147483647;
 const ll llinf = 9223372036854775807ll;
-using std::min;
-using std::max;
 using std::abs;
+using std::max;
+using std::min;
 using std::sort;
 const int N = 280000;
 const int Mod = 998244353, g = 3, gi = 332748118;
@@ -40,7 +38,10 @@ class Poly {
 public:
   int *a;
   int deg;
-  Poly() { a = new int[N]; memset(a, 0, sizeof(int) * (N - 1)); }
+  Poly() {
+    a = new int[N];
+    memset(a, 0, sizeof(int) * (N - 1));
+  }
   void NTT(int, bool) const;
   Poly inv() const;
   Poly drv() const;
@@ -49,12 +50,24 @@ public:
   Poly exp() const;
 };
 int pow(int, int, int);
-int add(int a, int b) { a += b; if (a >= Mod) {a -= Mod;} return a; }
-int sub(int a, int b) { a -= b; if (a < 0) {a += Mod;} return a; }
+int add(int a, int b) {
+  a += b;
+  if (a >= Mod) {
+    a -= Mod;
+  }
+  return a;
+}
+int sub(int a, int b) {
+  a -= b;
+  if (a < 0) {
+    a += Mod;
+  }
+  return a;
+}
 int r[N];
 int n;
 
-int main () {
+int main() {
   read(n);
   Poly f;
   f.deg = --n;
@@ -69,8 +82,7 @@ int main () {
   return 0;
 }
 
-template<class T>
-inline void read(T &Re) {
+template <class T> inline void read(T &Re) {
   T k = 0;
   char ch = getchar();
   int flag = 1;
@@ -86,8 +98,7 @@ inline void read(T &Re) {
   }
   Re = flag * k;
 }
-template<class T>
-inline void write(const T &Wr) {
+template <class T> inline void write(const T &Wr) {
   if (Wr < 0) {
     putchar('-');
     write(-Wr);
@@ -138,12 +149,10 @@ void Poly::NTT(int lim, bool opt) const {
 Poly Poly::inv() const {
   Poly A, B;
   int now = 1;
-  Poly ans;
-  ans.a[0] = pow(this->a[0], Mod - 2, Mod);
+  B.a[0] = pow(this->a[0], Mod - 2, Mod);
   while ((now >> 1) <= this->deg) {
     for (int i = 0; i < now; ++i) {
       A.a[i] = this->a[i];
-      B.a[i] = ans.a[i];
     }
     int lim = now << 1;
     for (int i = 0; i < lim; ++i) {
@@ -151,19 +160,19 @@ Poly Poly::inv() const {
     }
     A.NTT(lim, false), B.NTT(lim, false);
     for (int i = 0; i < lim; ++i) {
-      ans.a[i] = B.a[i] * 1ll * sub(2, int(A.a[i] * 1ll * B.a[i] % Mod)) % Mod;
+      B.a[i] = B.a[i] * 1ll * sub(2, int(A.a[i] * 1ll * B.a[i] % Mod)) % Mod;
     }
-    ans.NTT(lim, true);
+    B.NTT(lim, true);
     for (int i = now; i < lim; ++i) {
-      ans.a[i] = 0;
+      B.a[i] = 0;
     }
     now <<= 1;
   }
-  ans.deg = this->deg;
-  for (int i = ans.deg + 1; i < (now >> 1); ++i) {
-    ans.a[i] = 0;
+  B.deg = this->deg;
+  for (int i = B.deg + 1; i < (now >> 1); ++i) {
+    B.a[i] = 0;
   }
-  return ans;
+  return B;
 }
 Poly Poly::drv() const {
   Poly ans;
@@ -203,13 +212,11 @@ Poly Poly::ln() const {
 }
 Poly Poly::exp() const {
   Poly A, B, L;
-  Poly ans;
-  ans.a[0] = 1;
+  B.a[0] = 1;
   int now = 1;
   while ((now >> 1) <= this->deg) {
     for (int i = 0; i < now; ++i) {
       A.a[i] = this->a[i];
-      B.a[i] = ans.a[i];
     }
     B.deg = now - 1;
     L = B.ln();
@@ -219,17 +226,17 @@ Poly Poly::exp() const {
     }
     A.NTT(lim, false), B.NTT(lim, false), L.NTT(lim, false);
     for (int i = 0; i < lim; ++i) {
-      ans.a[i] = B.a[i] * 1ll * sub(add(1, A.a[i]), L.a[i]) % Mod;
+      B.a[i] = B.a[i] * 1ll * sub(add(1, A.a[i]), L.a[i]) % Mod;
     }
-    ans.NTT(lim, true);
+    B.NTT(lim, true);
     for (int i = now; i < lim; ++i) {
-      ans.a[i] = 0;
+      B.a[i] = 0;
     }
     now <<= 1;
   }
-  ans.deg = this->deg;
-  for (int i = ans.deg + 1; i < (now >> 1); ++i) {
-    ans.a[i] = 0;
+  B.deg = this->deg;
+  for (int i = B.deg + 1; i < (now >> 1); ++i) {
+    B.a[i] = 0;
   }
-  return ans;
+  return B;
 }

@@ -1,40 +1,40 @@
 #include <algorithm>
-#include <iostream>
-#include <cstring>
-#include <cstdlib>
-#include <complex>
-#include <cstdio>
-#include <string>
-#include <vector>
 #include <bitset>
 #include <cmath>
-#include <queue>
-#include <stack>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <ctime>
-#include <set>
+#include <iostream>
 #include <map>
+#include <queue>
 #include <random>
+#include <set>
+#include <stack>
+#include <string>
+#include <vector>
 
 #define isNum(a) (a >= '0' && a <= '9')
 #define SP putchar(' ')
 #define EL putchar('\n')
 #define File(a) freopen(a ".in", "r", stdin), freopen(a ".out", "w", stdout)
 
-template<class T>
-void read(T&);
-template<class T>
-void write(const T&);
+template <class T>
+void read(T &);
+template <class T>
+void write(const T &);
 
 typedef long long ll;
 typedef unsigned long long ull;
-typedef const long long & cll;
-typedef const int & ci;
+typedef const long long &cll;
+typedef const int &ci;
 typedef std::pair<int, int> pii;
 const int iinf = 2147483647;
 const ll llinf = 9223372036854775807ll;
-using std::min;
-using std::max;
 using std::abs;
+using std::max;
+using std::min;
 using std::sort;
 
 const int N = 100005;
@@ -50,10 +50,10 @@ void del(int);
 
 int B;
 class Query {
-public:
+ public:
   int l, r;
   int id;
-  friend bool operator < (const Query &i, const Query &j) {
+  friend bool operator<(const Query &i, const Query &j) {
     return (i.l / B == j.l / B) ? (i.r < j.r) : (i.l < j.l);
   }
 } Q[N];
@@ -68,7 +68,7 @@ int ans[N], now;
 int n, q;
 std::mt19937 rnd(19260817);
 
-int main () {
+int main() {
   File("5071");
   getp(1000);
   read(n), read(q);
@@ -143,7 +143,7 @@ int main () {
   return 0;
 }
 
-template<class T>
+template <class T>
 inline void read(T &Re) {
   T k = 0;
   char ch = getchar();
@@ -160,7 +160,7 @@ inline void read(T &Re) {
   }
   Re = flag * k;
 }
-template<class T>
+template <class T>
 inline void write(const T &Wr) {
   if (Wr < 0) {
     putchar('-');
@@ -229,16 +229,12 @@ bool miller_rabin(int n) {
   }
   return true;
 }
-int gcd(int a, int b) {
-  return b == 0 ? a : gcd(b, a % b);
-}
-int f(int x, int c, int n) {
-  return (x * 1ll * x % n + c) % n;
-}
+int gcd(int a, int b) { return b == 0 ? a : gcd(b, a % b); }
+int f(int x, int c, int n) { return (x * 1ll * x % n + c) % n; }
 int pollard_rho(int n, int c) {
   int l, r;
   l = r = rnd() % (n - 1) + 1;
-  for (int len = 2; ; len <<= 1, l = r) {
+  for (int len = 2;; len <<= 1, l = r) {
     int v = 1;
     for (int i = 1; i <= len; ++i) {
       r = f(r, c, n);

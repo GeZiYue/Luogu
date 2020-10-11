@@ -1,122 +1,158 @@
-#include<iostream>
-#include<cstdio>
-#include<cmath>
-#include<cstring>
-#include<cstdlib>
-#include<algorithm>
-using namespace std;
-#define isNum(a) (a>='0'&&a<='9')
+#include <algorithm>
+#include <bitset>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <vector>
+
+#define isNum(a) (a >= '0' && a <= '9')
 #define SP putchar(' ')
 #define EL putchar('\n')
-#define N 5005
-#define M 50005
-#define inf 2147483647
-#define File(a) freopen((string(a)+string(".in")).c_str(),"r",stdin),freopen((string(a)+string(".out")).c_str(),"w",stdout)
-template<class T1>void read(T1 &r_e_a_d);
-template<class T1>void write(T1 w_r_i_t_e);
-void add(int x,int y,int flownow,int costnow);
-bool BFS();
-void Max_Flow();
-int que[2*M],qh,qt;
-int hed[N],nxt[2*M],to[2*M],cost[2*M],flow[2*M],id=1;
-int n,s,t;
-int maxflow,mincost;
-int dis[N],fin[N],ans[N];
-bool flag[N];
-int main(){
-    int m,x,y,flownow,costnow,i;
-    read(n);
-    read(m);
-    read(s);
-    read(t);
-    for(i=1;i<=m;i++){
-        read(x);
-        read(y);
-        read(flownow);
-        read(costnow);
-        add(x,y,flownow,costnow);
-        add(y,x,0,-costnow);
-    }
-    Max_Flow();
-    write(maxflow);
-    SP;
-    write(mincost);
-    EL;
-    return 0;
+#define File(a) freopen(a ".in", "r", stdin), freopen(a ".out", "w", stdout)
+
+template <class T> void read(T &);
+template <class T> void write(const T &);
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef const long long &cll;
+typedef const int &ci;
+typedef std::pair<int, int> pii;
+const int iinf = 2147483647;
+const ll llinf = 9223372036854775807ll;
+using std::abs;
+using std::max;
+using std::min;
+
+const int N = 5005;
+const int M = 100005;
+
+void add(int u, int v, int f, int c);
+bool SPFA();
+int Dinic(int u, int f);
+void MCMF();
+
+int hed[N], nxt[M], to[M], flw[M], cot[M], id = 1;
+int cur[N], dis[N];
+bool vis[N];
+int Minc, Maxf;
+int S, T;
+int n, m;
+int ans;
+
+int main() {
+  read(n), read(m), read(S), read(T);
+  for (int i = 1; i <= m; ++i) {
+    int u, v, f, c;
+    read(u), read(v), read(f), read(c);
+    add(u, v, f, c);
+    add(v, u, 0, -c);
+  }
+  MCMF();
+  write(Maxf), SP, write(Minc), EL;
+  return 0;
 }
-template<class T1>void read(T1 &r_e_a_d){
-    T1 k=0;
-    char ch=getchar();
-    int flag=1;
-    while(!isNum(ch)){
-        if(ch=='-'){
-            flag=-1;
+
+template <class T> inline void read(T &Re) {
+  T k = 0;
+  char ch = getchar();
+  int flag = 1;
+  while (!isNum(ch)) {
+    if (ch == '-') {
+      flag = -1;
+    }
+    ch = getchar();
+  }
+  while (isNum(ch)) {
+    k = (k << 1) + (k << 3) + ch - '0';
+    ch = getchar();
+  }
+  Re = flag * k;
+}
+template <class T> inline void write(const T &Wr) {
+  if (Wr < 0) {
+    putchar('-');
+    write(-Wr);
+  } else {
+    if (Wr < 10) {
+      putchar(Wr + '0');
+    } else {
+      write(Wr / 10);
+      putchar((Wr % 10) + '0');
+    }
+  }
+}
+
+void add(int u, int v, int f, int c) {
+  nxt[++id] = hed[u];
+  hed[u] = id;
+  to[id] = v;
+  flw[id] = f;
+  cot[id] = c;
+}
+bool SPFA() {
+  for (int i = 1; i <= n; ++i) {
+    dis[i] = iinf;
+    cur[i] = hed[i];
+  }
+  dis[S] = 0;
+  std::queue<int> q;
+  q.push(S);
+  vis[S] = true;
+  while (!q.empty()) {
+    int u = q.front();
+    q.pop();
+    vis[u] = false;
+    for (int i = hed[u]; i; i = nxt[i]) {
+      int v = to[i];
+      if (flw[i] && dis[u] + cot[i] < dis[v]) {
+        dis[v] = dis[u] + cot[i];
+        if (!vis[v]) {
+          vis[v] = true;
+          q.push(v);
         }
-        ch=getchar();
+      }
     }
-    while(isNum(ch)){
-        k=(k<<1)+(k<<3)+ch-'0';
-        ch=getchar();
-    }
-    r_e_a_d=flag*k;
+  }
+  return dis[T] != iinf;
 }
-template<class T1>void write(T1 w_r_i_t_e){
-    if(w_r_i_t_e<0){
-        putchar('-');
-        write(-w_r_i_t_e);
-    }else{
-        if(w_r_i_t_e<10){
-            putchar(w_r_i_t_e+'0');
-        }else{
-            write(w_r_i_t_e/10);
-            putchar((w_r_i_t_e%10)+'0');
+int Dinic(int u, int f) {
+  if (u == T || !f) {
+    return f;
+  }
+  vis[u] = true;
+  int ans = 0;
+  for (int &i = cur[u]; i; i = nxt[i]) {
+    int v = to[i];
+    if (!vis[v] && flw[i] && dis[u] + cot[i] == dis[v]) {
+      int now = Dinic(v, min(flw[i], f));
+      if (now) {
+        flw[i] -= now, flw[i ^ 1] += now;
+        ans += now, f -= now;
+        Minc += now * cot[i];
+        if (!f) {
+          break;
         }
+      }
     }
+  }
+  vis[u] = false;
+  return ans;
 }
-void add(int x,int y,int flownow,int costnow){
-    nxt[++id]=hed[x];
-    hed[x]=id;
-    to[id]=y;
-    flow[id]=flownow;
-    cost[id]=costnow;
-}
-bool BFS(){
-    int i,now;
-    for(i=1;i<=n;i++){
-        dis[i]=inf;
-        flag[i]=false;
+void MCMF() {
+  while (SPFA()) {
+    int x;
+    while ((x = Dinic(S, iinf))) {
+      Maxf += x;
     }
-    que[qh=qt=1]=s;
-    dis[s]=0;
-    ans[s]=inf;
-    flag[s]=true;
-    while(qh<=qt){
-        now=que[qh++];
-        flag[now]=false;
-        for(i=hed[now];i;i=nxt[i]){
-            if(flow[i]>0&&dis[to[i]]>dis[now]+cost[i]){
-                ans[to[i]]=min(ans[now],flow[i]);
-                dis[to[i]]=dis[now]+cost[i];
-                fin[to[i]]=i;
-                if(flag[to[i]]==false){
-                    flag[to[i]]=true;
-                    que[++qt]=to[i];
-                }
-            }
-        }
-    }
-    return dis[t]!=inf;
-}
-void Max_Flow(){
-    int now;
-    while(BFS()){
-        now=t;
-        while(now^s){
-            flow[fin[now]]-=ans[t];
-            flow[fin[now]^1]+=ans[t];
-            now=to[fin[now]^1];
-        }
-        maxflow+=ans[t];
-        mincost+=ans[t]*dis[t];
-    }
+  }
 }
