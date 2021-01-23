@@ -1,50 +1,50 @@
 #include <algorithm>
-#include <iostream>
-#include <cstring>
-#include <cstdlib>
-#include <complex>
-#include <cstdio>
-#include <string>
-#include <vector>
 #include <bitset>
 #include <cmath>
-#include <queue>
-#include <stack>
-#include <set>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
 #include <map>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <vector>
 
 #define isNum(a) (a >= '0' && a <= '9')
 #define SP putchar(' ')
 #define EL putchar('\n')
 #define File(a) freopen(a ".in", "r", stdin), freopen(a ".out", "w", stdout)
 
-template<class T>
-void read(T&);
-template<class T>
-void write(const T&);
+template <class T>
+void read(T &);
+template <class T>
+void write(const T &);
 
 typedef long long ll;
-typedef const long long & cll;
-typedef const int & ci;
+typedef const long long &cll;
+typedef const int &ci;
 typedef std::pair<int, int> pii;
 const int iinf = 2147483647;
 const ll llinf = 9223372036854775807ll;
-using std::min;
-using std::max;
 using std::abs;
-using std::sort;
-const int N = 10005;
-const int M = 200005;
+using std::max;
+using std::min;
+
+constexpr int N = 10005;
+constexpr int M = 200005;
 
 void add(int, int, int);
-int dinic();
+ll Dinic();
 
 int hed[N], cur[N], nxt[M], to[M], flw[M], id = 1;
 int que[N], qh, qt;
 int dep[N];
 int n, m, S, T;
 
-int main () {
+int main() {
   read(n), read(m), read(S), read(T);
   for (int i = 1; i <= m; ++i) {
     int u, v, f;
@@ -52,11 +52,11 @@ int main () {
     add(u, v, f);
     add(v, u, 0);
   }
-  write(dinic()), EL;
+  write(Dinic()), EL;
   return 0;
 }
 
-template<class T>
+template <class T>
 inline void read(T &Re) {
   T k = 0;
   char ch = getchar();
@@ -73,7 +73,7 @@ inline void read(T &Re) {
   }
   Re = flag * k;
 }
-template<class T>
+template <class T>
 inline void write(const T &Wr) {
   if (Wr < 0) {
     putchar('-');
@@ -94,7 +94,7 @@ void add(int u, int v, int f) {
   to[id] = v;
   flw[id] = f;
 }
-bool dinic_bfs() {
+bool Dinic_bfs() {
   for (int i = 1; i <= n; ++i) {
     dep[i] = -1;
     cur[i] = hed[i];
@@ -112,7 +112,7 @@ bool dinic_bfs() {
   }
   return ~dep[T];
 }
-int dinic_dfs(int u, int f) {
+ll Dinic_dfs(int u, int f) {
   if (u == T || f == 0) {
     return f;
   }
@@ -121,7 +121,7 @@ int dinic_dfs(int u, int f) {
     cur[u] = i;
     int v = to[i];
     if (dep[v] == dep[u] + 1) {
-      int now = dinic_dfs(v, min(f, flw[i]));
+      int now = Dinic_dfs(v, min(f, flw[i]));
       flw[i] -= now;
       flw[i ^ 1] += now;
       ans += now;
@@ -133,10 +133,10 @@ int dinic_dfs(int u, int f) {
   }
   return ans;
 }
-int dinic() {
-  int ans = 0;
-  while (dinic_bfs()) {
-    ans += dinic_dfs(S, iinf);
+ll Dinic() {
+  ll ans = 0;
+  while (Dinic_bfs()) {
+    ans += Dinic_dfs(S, iinf);
   }
   return ans;
 }
