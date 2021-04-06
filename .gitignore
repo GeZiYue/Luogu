@@ -1,6 +1,5 @@
-*.exe
-.vs
+*
+!*.cpp
+!*.py
+!*.java
 tmp.cpp
-*.in
-*.out
-contest

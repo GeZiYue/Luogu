@@ -33,25 +33,26 @@ Poly inv(Poly A, int n);
 Poly mult(const Poly &A, int n, const Poly &B, int m);
 Poly Tmul(const Poly &A, int n, const Poly &B, int m);
 void getv(Poly A, int n, int *f, int *ans, int m);
+Poly lagrange(int *vx, int *vy, int n);
 Poly G[N << 1];
+Poly M[N << 1];
 ull tmp[N];
 int gw[N];
 int r[N];
 }  // namespace Pol
 
-int f[N];
-int ans[N];
-int n, m;
+int x[N], y[N];
+int n;
 
 int main() {
   Pol::init_Poly();
-  read(n), read(m);
-  ++n;
-  Poly F(n);
-  for (int i = 0; i < n; ++i) read(F[i]);
-  for (int i = 0; i < m; ++i) read(f[i]);
-  Pol::getv(F, n, f, ans, m);
-  for (int i = 0; i < m; ++i) write(ans[i]), EL;
+  read(n);
+  for (int i = 0; i < n; ++i) {
+    read(x[i]), read(y[i]);
+  }
+  Poly ans = Pol::lagrange(x, y, n);
+  for (int i = 0; i < n; ++i) write(ans[i]), SP;
+  EL;
   return 0;
 }
 
@@ -175,6 +176,50 @@ void getv(Poly A, int n, int *f, int *ans, int m) {
   for (int i = 0; i <= n; ++i) h[i] = h[i + n - 1];
   h.resize(n + 1);
   getans(1, 0, n - 1, ans, m, h);
+}
+void getm(int x, int xl, int xr, int *vx) {
+  if (xl == xr) {
+    M[x].resize(2);
+    M[x][1] = 1, M[x][0] = Mod - vx[xl];
+    return;
+  }
+  int xm = (xl + xr) >> 1;
+  getm(x << 1, xl, xm, vx), getm(x << 1 | 1, xm + 1, xr, vx);
+  M[x] = mult(M[x << 1], xm - xl + 2, M[x << 1 | 1], xr - xm + 1);
+}
+Poly getp(int x, int xl, int xr, int *vx, int *v) {
+  if (xl == xr) {
+    Poly F(1);
+    F[0] = v[xl];
+    return F;
+  }
+  int xm = (xl + xr) >> 1;
+  Poly Fl = getp(x << 1, xl, xm, vx, v), Fr = getp(x << 1 | 1, xm + 1, xr, vx, v);
+  Fl = mult(Fl, xm - xl + 1, M[x << 1 | 1], xr - xm + 1);
+  Fr = mult(Fr, xr - xm, M[x << 1], xm - xl + 2);
+  Poly F(xr - xl + 1);
+  for (int i = 0; i <= xr - xl; ++i) {
+    F[i] = (Fl[i] + Fr[i]) % Mod;
+  }
+  return F;
+}
+Poly lagrange(int *vx, int *vy, int n) {
+  getm(1, 0, n - 1, vx);
+  Poly M0 = M[1];
+  for (int i = 0; i < n; ++i) {
+    M0[i] = 1ll * M0[i + 1] * (i + 1) % Mod;
+  }
+  M0[n] = 0;
+  static int v[N], f[N];
+  for (int i = 0; i < n; ++i) {
+    f[i] = vx[i];
+  }
+  getv(M0, n, f, v, n);
+  for (int i = 0; i < n; ++i) {
+    v[i] = 1ll * vy[i] * pow(v[i], Mod - 2, Mod) % Mod;
+  }
+  Poly F = getp(1, 0, n - 1, vx, v);
+  return F;
 }
 void getr(int lim) {
   for (int i = 0; i < lim; ++i) r[i] = (r[i >> 1] >> 1) | ((i & 1) * (lim >> 1));

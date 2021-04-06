@@ -17,51 +17,46 @@ typedef std::pair<int, int> pii;
 const int iinf = 2147483647;
 const ll llinf = 9223372036854775807ll;
 
-constexpr int N = 11000005;
+const int N = 2005;
 
-char tmp[N];
-char ch[N << 1];
-int t[N << 1];
-int n;
+int p, k, n;
 
 int main() {
-  scanf("%s", tmp + 1);
-  n = strlen(tmp + 1);
-  ch[0] = ch[1] = '#';
-  for (int i = 1; i <= n; ++i) {
-    ch[i << 1] = tmp[i];
-    ch[i << 1 | 1] = '#';
-  }
-  int mid = 1, r = 0;
-  for (int i = 1; i <= (n << 1 | 1); ++i) {
-    if (i <= r) {
-      t[i] = std::min(r - i, t[2 * mid - i]);
+  read(p), read(k);
+  puts("YES");
+  std::function<int(int, int)> plus = [](int a, int b) -> int {
+    int ans = 0, pw = 1;
+    for (int i = 0; i < k; ++i, a /= p, b /= p, pw *= p) ans += (a % p + b % p + p) % p * pw;
+    return ans;
+  };
+  int n = 1;
+  for (int i = 0; i < k; ++i) n *= p;
+  std::vector<std::vector<bool>> ok(n, std::vector<bool>(n));
+  for (int i = 0; i < n; ++i) {
+    for (int j = i + 1; j < n; ++j) {
+      if (!ok[i][j]) {
+        std::vector<int> now;
+        now.push_back(i);
+        int v = plus(j, -i);
+        for (int l = 1; l < p; ++l) now.push_back(plus(now.back(), v));
+        for (int i : now) {
+          write(i), SP;
+          for (int j : now) ok[i][j] = true;
+        }
+        EL;
+      }
     }
-    while (ch[i + t[i] + 1] == ch[i - t[i] - 1]) {
-      ++t[i];
-    }
-    int tmp = i + t[i];
-    if (tmp > r) {
-      mid = i, r = tmp;
-    }
   }
-  int ans = 0;
-  for (int i = 1; i <= (n << 1 | 1); ++i) {
-    ans = std::max(ans, t[i]);
-  }
-  write(ans), EL;
   return 0;
 }
 
 template <typename T>
-inline void read(T &Re) {
+void read(T &Re) {
   T k = 0;
   char ch = getchar();
   int flag = 1;
   while (!isNum(ch)) {
-    if (ch == '-') {
-      flag = -1;
-    }
+    if (ch == '-') flag = -1;
     ch = getchar();
   }
   while (isNum(ch)) {
@@ -71,7 +66,7 @@ inline void read(T &Re) {
   Re = flag * k;
 }
 template <typename T>
-inline void write(const T &Wr) {
+void write(const T &Wr) {
   if (Wr < 0) {
     putchar('-');
     write(-Wr);

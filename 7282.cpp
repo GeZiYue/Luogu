@@ -17,39 +17,32 @@ typedef std::pair<int, int> pii;
 const int iinf = 2147483647;
 const ll llinf = 9223372036854775807ll;
 
-constexpr int N = 11000005;
+constexpr int N = 1005;
 
-char tmp[N];
-char ch[N << 1];
-int t[N << 1];
+int col(int a, int b) { return (a / 4 == b / 4) ? 1 : ((a / 16 == b / 16) ? 2 : 3); }
+
+ll x[N];
+int h[N];
 int n;
 
 int main() {
-  scanf("%s", tmp + 1);
-  n = strlen(tmp + 1);
-  ch[0] = ch[1] = '#';
+  read(n);
   for (int i = 1; i <= n; ++i) {
-    ch[i << 1] = tmp[i];
-    ch[i << 1 | 1] = '#';
+    read(x[i]);
   }
-  int mid = 1, r = 0;
-  for (int i = 1; i <= (n << 1 | 1); ++i) {
-    if (i <= r) {
-      t[i] = std::min(r - i, t[2 * mid - i]);
-    }
-    while (ch[i + t[i] + 1] == ch[i - t[i] - 1]) {
-      ++t[i];
-    }
-    int tmp = i + t[i];
-    if (tmp > r) {
-      mid = i, r = tmp;
-    }
+  for (int i = 1; i <= n; ++i) {
+    h[i] = 63 - __builtin_clzll(x[i]);
   }
-  int ans = 0;
-  for (int i = 1; i <= (n << 1 | 1); ++i) {
-    ans = std::max(ans, t[i]);
+  for (int i = 2; i <= n; ++i) {
+    for (int j = 1; j < i; ++j) {
+      if (x[i] % x[j] == 0) {
+        write(col(h[i], h[j])), SP;
+      } else {
+        write(1), SP;
+      }
+    }
+    EL;
   }
-  write(ans), EL;
   return 0;
 }
 

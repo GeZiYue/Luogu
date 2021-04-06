@@ -17,8 +17,9 @@ typedef std::pair<int, int> pii;
 const int iinf = 2147483647;
 const ll llinf = 9223372036854775807ll;
 
-const int N = 280000;
-const int Mod = 998244353, g = 3;
+const int N = 530000;
+const int Mod = 998244353, g = 3, iv2 = (Mod + 1) / 2;
+
 typedef std::vector<int> Poly;
 
 int pow(int a, int b, int m);
@@ -28,35 +29,87 @@ int sub(int a, int b) { return (a -= b) < 0 ? a += Mod : a; }
 namespace Pol {
 void getr(int lim);
 void init_Poly();
-void NTT(int *A, int lim, bool flag);
+void NTT(Poly &A, int lim, bool flag);
 Poly inv(Poly A, int n);
-Poly mult(const Poly &A, int n, const Poly &B, int m);
-Poly Tmul(const Poly &A, int n, const Poly &B, int m);
-void getv(Poly A, int n, int *f, int *ans, int m);
+Poly mult(Poly A, int n, Poly B, int m);
+Poly Tmul(Poly A, int n, Poly B, int m);
+void getv(const Poly &A, int n, int *f, int *ans, int m);
 Poly G[N << 1];
 ull tmp[N];
 int gw[N];
 int r[N];
 }  // namespace Pol
 
-int f[N];
+Poly solve(int xl, int xr);
+void dfs(int u);
+
 int ans[N];
-int n, m;
+std::vector<int> G[N];
+std::vector<int> cir;
+bool vis[N];
+int fa[N], siz[N];
+int al[N], s[N];
+int iv[N];
+int n, a, b;
 
 int main() {
   Pol::init_Poly();
-  read(n), read(m);
-  ++n;
-  Poly F(n);
-  for (int i = 0; i < n; ++i) read(F[i]);
-  for (int i = 0; i < m; ++i) read(f[i]);
-  Pol::getv(F, n, f, ans, m);
-  for (int i = 0; i < m; ++i) write(ans[i]), EL;
+  read(n), read(a), read(b);
+  for (int i = 1; i < n; ++i) {
+    int u, v;
+    read(u), read(v);
+    G[u].push_back(v), G[v].push_back(u);
+  }
+  int fac = 1;
+  for (int i = 1; i <= n; ++i) fac = 1ll * fac * i % Mod;
+  iv[1] = 1;
+  for (int i = 2; i <= n; ++i) iv[i] = 1ll * (Mod - Mod / i) * iv[Mod % i] % Mod;
+  dfs(a);
+  for (int x = b; x; x = fa[x]) cir.push_back(x), vis[x] = true;
+  cir.push_back(0);
+  std::reverse(cir.begin(), cir.end());
+  int sz = cir.size() - 1;
+  for (int i = 1; i <= sz; ++i) {
+    int u = cir[i];
+    dfs(u);
+    al[i] = siz[u];
+  }
+  for (int i = 1; i <= sz; ++i) s[i] = (s[i - 1] + al[i]) % Mod;
+  for (int i = 1; i <= n; ++i) {
+    if (!vis[i]) fac = 1ll * fac * iv[siz[i]] % Mod;
+  }
+  Poly p = solve(0, sz);
+  for (int i = 0; i <= sz; ++i) p[i] = 1ll * p[i + 1] * (i + 1) % Mod;
+  p[sz + 1] = 0;
+  Pol::getv(p, sz, s, ans, sz + 1);
+  int sum = 0;
+  fac = 1ll * iv2 * fac % Mod;
+  for (int i = 0, now = Mod - 1; i <= sz; ++i, now = Mod - now) {
+    sum = add(sum, 1ll * now * fac % Mod * pow(ans[i], Mod - 2, Mod) % Mod);
+  }
+  write(sum), EL;
   return 0;
 }
 
+void dfs(int u) {
+  siz[u] = 1;
+  for (int v : G[u]) {
+    if (v == fa[u] || vis[v]) continue;
+    fa[v] = u;
+    dfs(v);
+    siz[u] += siz[v];
+  }
+}
+Poly solve(int xl, int xr) {
+  if (xl == xr) {
+    return Poly{s[xl], Mod - 1};
+  }
+  int xm = (xl + xr) >> 1;
+  return Pol::mult(solve(xl, xm), xm - xl + 2, solve(xm + 1, xr), xr - xm + 1);
+}
+
 namespace Pol {
-void NTT(int *A, int lim, bool flag) {
+void NTT(Poly &A, int lim, bool flag) {
   for (int i = 0; i < lim; ++i) tmp[i] = A[i];
   for (int i = 0; i < lim; ++i) {
     if (i < r[i]) std::swap(tmp[i], tmp[r[i]]);
@@ -72,12 +125,32 @@ void NTT(int *A, int lim, bool flag) {
   if (flag) {
     std::reverse(tmp + 1, tmp + lim);
     int iv = pow(lim, Mod - 2, Mod);
-    for (int i = 0; i < lim; ++i) tmp[i] = tmp[i] % Mod * iv;
+    for (int i = 0; i < lim; ++i) tmp[i] = tmp[i] * iv % Mod;
   }
   for (int i = 0; i < lim; ++i) A[i] = tmp[i] % Mod;
 }
-Poly mult(const Poly &A, int n, const Poly &B, int m) {
-  if (n + m < 500) {
+Poly inv(Poly A, int n) {
+  int lim = 1;
+  while (lim < (n << 1)) lim <<= 1;
+  Poly F(lim), G(lim);
+  A.resize(lim);
+  G[0] = pow(A[0], Mod - 2, Mod);
+  int now = 1;
+  while (now < n) {
+    std::copy_n(A.begin(), now << 1, F.begin());
+    int lim = now << 2;
+    getr(lim);
+    NTT(G, lim, false), NTT(F, lim, false);
+    for (int i = 0; i < lim; ++i) G[i] = 1ll * sub(2, 1ll * G[i] * F[i] % Mod) * G[i] % Mod;
+    NTT(G, lim, true);
+    std::fill_n(G.begin() + (now << 1), now << 1, 0);
+    now <<= 1;
+  }
+  G.resize(n);
+  return G;
+}
+Poly mult(Poly A, int n, Poly B, int m) {
+  if (1ll * n * m < 64) {
     Poly ans(n + m - 1);
     std::fill(tmp, tmp + n + m, 0);
     for (int i = 0; i < n; ++i)
@@ -87,19 +160,17 @@ Poly mult(const Poly &A, int n, const Poly &B, int m) {
   }
   int lim = 1;
   while (lim < (n + m - 1)) lim <<= 1;
-  static int tA[N], tB[N];
-  std::copy_n(A.begin(), n, tA), std::fill(tA + n, tA + lim, 0);
-  std::copy_n(B.begin(), m, tB), std::fill(tB + m, tB + lim, 0);
+  Poly ans(lim);
+  A.resize(lim), B.resize(lim);
   getr(lim);
-  NTT(tA, lim, false), NTT(tB, lim, false);
-  for (int i = 0; i < lim; ++i) tA[i] = 1ll * tA[i] * tB[i] % Mod;
-  NTT(tA, lim, true);
-  Poly ans(n + m - 1);
-  std::copy_n(tA, n + m - 1, ans.begin());
+  NTT(A, lim, false), NTT(B, lim, false);
+  for (int i = 0; i < lim; ++i) ans[i] = 1ll * A[i] * B[i] % Mod;
+  NTT(ans, lim, true);
+  ans.resize(n + m - 1);
   return ans;
 }
-Poly Tmul(const Poly &A, int n, const Poly &B, int m) {
-  if (n + m < 500) {
+Poly Tmul(Poly A, int n, Poly B, int m) {
+  if (1ll * n * m < 64) {
     Poly ans(m - n + 1);
     std::fill(tmp, tmp + m - n + 2, 0);
     for (int i = 0; i < m; ++i)
@@ -108,39 +179,16 @@ Poly Tmul(const Poly &A, int n, const Poly &B, int m) {
   }
   int lim = 1;
   while (lim < m) lim <<= 1;
-  static int tA[N], tB[N];
-  std::reverse_copy(A.begin(), A.begin() + n, tA), std::fill(tA + n, tA + lim, 0);
-  std::copy_n(B.begin(), m, tB), std::fill(tB + m, tB + lim, 0);
+  Poly ans(lim);
+  std::reverse(A.begin(), A.begin() + n);
+  A.resize(lim), B.resize(lim);
   getr(lim);
-  NTT(tA, lim, false), NTT(tB, lim, false);
-  for (int i = 0; i < lim; ++i) tA[i] = 1ll * tA[i] * tB[i] % Mod;
-  NTT(tA, lim, true);
-  Poly ans(m - n + 1);
-  std::copy_n(tA + n - 1, m - n + 1, ans.begin());
+  NTT(A, lim, false), NTT(B, lim, false);
+  for (int i = 0; i < lim; ++i) ans[i] = 1ll * A[i] * B[i] % Mod;
+  NTT(ans, lim, true);
+  for (int i = 0; i <= m - n; ++i) ans[i] = ans[i + n - 1];
+  ans.resize(m - n + 1);
   return ans;
-}
-Poly inv(Poly A, int n) {
-  int lim = 1;
-  while (lim < (n << 1)) lim <<= 1;
-  Poly F(lim), G(lim);
-  A.resize(lim);
-  G[0] = pow(A[0], Mod - 2, Mod);
-  int now = 1;
-  static int tA[N], tB[N];
-  while (now < n) {
-    std::copy_n(A.begin(), now << 1, F.begin());
-    int lim = now << 2;
-    getr(lim);
-    std::copy_n(G.begin(), lim, tA);
-    std::copy_n(F.begin(), lim, tB);
-    NTT(tA, lim, false), NTT(tB, lim, false);
-    for (int i = 0; i < lim; ++i) tA[i] = 1ll * sub(2, 1ll * tA[i] * tB[i] % Mod) * tA[i] % Mod;
-    NTT(tA, lim, true);
-    std::copy_n(tA, now << 1, G.begin());
-    now <<= 1;
-  }
-  G.resize(n);
-  return G;
 }
 void getg(int x, int xl, int xr, int *f, int m) {
   if (xl == xr) {
@@ -160,27 +208,26 @@ void getans(int x, int xl, int xr, int *ans, int m, const Poly &h) {
   if (xl >= m) return;
   if (xl == xr) return void(ans[xl] = h[0]);
   int xm = (xl + xr) >> 1;
-  Poly hl = Tmul(G[x << 1 | 1], xr - xm + 1, h, xr - xl + 1);
+  Poly hl = Tmul(G[x << 1 | 1], xr - xm + 1, h, xr - xl + 2);
   getans(x << 1, xl, xm, ans, m, hl);
-  Poly hr = Tmul(G[x << 1], xm - xl + 2, h, xr - xl + 1);
+  Poly hr = Tmul(G[x << 1], xm - xl + 2, h, xr - xl + 2);
   getans(x << 1 | 1, xm + 1, xr, ans, m, hr);
 }
-void getv(Poly A, int n, int *f, int *ans, int m) {
+void getv(const Poly &A, int n, int *f, int *ans, int m) {
   n = std::max(n, m);
-  A.resize(n);
   getg(1, 0, n - 1, f, m);
   Poly now = inv(G[1], n);
   std::reverse(now.begin(), now.begin() + n);
   Poly h = mult(now, n, A, n);
-  for (int i = 0; i <= n; ++i) h[i] = h[i + n - 1];
-  h.resize(n + 1);
+  for (int i = 0; i < n; ++i) h[i] = h[i + n - 1];
+  h.resize(n);
   getans(1, 0, n - 1, ans, m, h);
 }
 void getr(int lim) {
   for (int i = 0; i < lim; ++i) r[i] = (r[i >> 1] >> 1) | ((i & 1) * (lim >> 1));
 }
 void init_Poly() {
-  for (int l = 1; l < (1 << 18); l <<= 1) {
+  for (int l = 1; l < (1 << 19); l <<= 1) {
     gw[l] = 1;
     int gn = pow(g, (Mod - 1) / (l << 1), Mod);
     for (int j = 1; j < l; ++j) {

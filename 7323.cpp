@@ -17,41 +17,43 @@ typedef std::pair<int, int> pii;
 const int iinf = 2147483647;
 const ll llinf = 9223372036854775807ll;
 
-constexpr int N = 11000005;
+constexpr int N = 300005;
 
-char tmp[N];
-char ch[N << 1];
-int t[N << 1];
-int n;
+int find(int x);
+
+std::queue<pii> q;
+std::map<int, int> mp[N];
+int fa[N];
+int n, m, k;
 
 int main() {
-  scanf("%s", tmp + 1);
-  n = strlen(tmp + 1);
-  ch[0] = ch[1] = '#';
+  read(n), read(m), read(k);
   for (int i = 1; i <= n; ++i) {
-    ch[i << 1] = tmp[i];
-    ch[i << 1 | 1] = '#';
+    fa[i] = i;
   }
-  int mid = 1, r = 0;
-  for (int i = 1; i <= (n << 1 | 1); ++i) {
-    if (i <= r) {
-      t[i] = std::min(r - i, t[2 * mid - i]);
-    }
-    while (ch[i + t[i] + 1] == ch[i - t[i] - 1]) {
-      ++t[i];
-    }
-    int tmp = i + t[i];
-    if (tmp > r) {
-      mid = i, r = tmp;
+  for (int i = 1; i <= m; ++i) {
+    int u, v, w;
+    read(u), read(v), read(w);
+    if (mp[v][w]) {
+      q.emplace(u, mp[v][w]);
+    } else {
+      mp[v][w] = u;
     }
   }
-  int ans = 0;
-  for (int i = 1; i <= (n << 1 | 1); ++i) {
-    ans = std::max(ans, t[i]);
+  while (!q.empty()) {
+    auto [u, v] = q.front();
+    q.pop();
+    fa[find(u)] = find(v);
+    if (mp[u].size() < mp[v].size()) {
+      mp[v].merge(mp[u]);
+    } else {
+      mp[u].merge(mp[v]);
+    }
   }
-  write(ans), EL;
   return 0;
 }
+
+int find(int x) { return fa[x] == x ? x : fa[x] = find(fa[x]); }
 
 template <typename T>
 inline void read(T &Re) {
